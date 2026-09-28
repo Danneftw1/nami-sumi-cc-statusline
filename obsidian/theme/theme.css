@@ -1,0 +1,535 @@
+/* ==========================================================================
+   Neon Sumi — an Obsidian theme
+   "Neon tubes mounted on an ink-wash scroll."
+
+   Rule of the house: neon is reserved for what is live or interactive
+   (links, active states, tags, heading accents, cursor, selection).
+   Everything static is warm ink and rice paper.
+
+   Structure
+     1. Accent + fonts          (on body, so Settings overrides still win)
+     2. Palette tokens          (--ns-*, this theme's own names)
+     3. Obsidian variables      (base, surfaces, text, extended colours)
+     4. Editor variables        (headings, links, tags, code, lists, tables…)
+     5. Window variables        (ribbon, tabs, sidebars, status bar, graph…)
+     6. Rules                   (glow, callouts, a few details)
+
+   Light mode uses the same dark palette: dark is the only designed variant.
+   There is no animation or transition anywhere in this file, so
+   prefers-reduced-motion has nothing to switch off.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. Accent + fonts
+   Declared on `body` (lowest specificity) so the accent colour picker and
+   font fields in Settings → Appearance can still override them.
+   -------------------------------------------------------------------------- */
+
+body {
+  /* #ff2ec4 — neon magenta */
+  --accent-h: 317;
+  --accent-s: 100%;
+  --accent-l: 59%;
+
+  --font-text-theme: "Zen Kaku Gothic New", system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-interface-theme: "Zen Kaku Gothic New", system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-monospace-theme: "Maple Mono NF", "JetBrains Mono", ui-monospace,
+    Menlo, monospace;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Palette tokens (--ns-* are Neon Sumi's own names, not Obsidian's)
+   -------------------------------------------------------------------------- */
+
+.theme-dark,
+.theme-light {
+  /* Ink and paper */
+  --ns-sumi: #0f0c0d;         /* ground */
+  --ns-raised: #171314;       /* raised surface */
+  --ns-deep: #0b090a;         /* deeper surface */
+  --ns-line: #2c2426;         /* borders */
+  --ns-ink: #544a46;          /* separators, faint UI */
+  --ns-stone: #928678;        /* secondary text */
+  --ns-soft: #cbbfa9;         /* soft text */
+  --ns-paper: #e8dcc6;        /* primary text */
+  --ns-bright: #f7efe2;       /* bright paper */
+
+  /* Neon */
+  --ns-magenta: #ff2ec4;
+  --ns-violet: #c46eff;
+  --ns-teal: #00ffcc;
+  --ns-cyan: #00eaff;
+  --ns-blue: #409cff;
+  --ns-mint: #40ffaa;
+  --ns-amber: #ffbe28;
+  --ns-red: #ff3864;
+  --ns-selection: #3a1830;
+
+  /* Glow — text-shadow for neon-coloured elements only, never body prose */
+  --ns-glow-magenta: 0 0 7px rgba(255, 46, 196, 0.42), 0 0 2px rgba(255, 46, 196, 0.25);
+  --ns-glow-violet: 0 0 7px rgba(196, 110, 255, 0.42), 0 0 2px rgba(196, 110, 255, 0.25);
+  --ns-glow-cyan: 0 0 7px rgba(0, 234, 255, 0.36), 0 0 2px rgba(0, 234, 255, 0.22);
+  --ns-glow-amber: 0 0 7px rgba(255, 190, 40, 0.36), 0 0 2px rgba(255, 190, 40, 0.22);
+}
+
+/* Light mode borrows the dark palette; keep native controls dark too. */
+.theme-light {
+  color-scheme: dark;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Obsidian foundation variables
+   -------------------------------------------------------------------------- */
+
+.theme-dark,
+.theme-light {
+  /* Base ramp, dark → light. Odd steps are midpoints between palette values. */
+  --color-base-00: #0f0c0d;
+  --color-base-05: #131011;
+  --color-base-10: #171314;
+  --color-base-20: #1e191a;
+  --color-base-25: #251e20;
+  --color-base-30: #2c2426;
+  --color-base-35: #403736;
+  --color-base-40: #544a46;
+  --color-base-50: #73685f;
+  --color-base-60: #928678;
+  --color-base-70: #cbbfa9;
+  --color-base-100: #e8dcc6;
+
+  /* Extended colours. The palette has no orange/yellow pair, so orange is
+     amber and yellow is the bright amber from the terminal palette.
+     The -rgb triplets are deprecated since 1.13 but still read by older
+     versions (canvas colours, default callouts), so both are set. */
+  --color-red: #ff3864;
+  --color-orange: #ffbe28;
+  --color-yellow: #ffd76e;
+  --color-green: #40ffaa;
+  --color-cyan: #00eaff;
+  --color-blue: #409cff;
+  --color-purple: #c46eff;
+  --color-pink: #ff2ec4;
+  --color-red-rgb: 255, 56, 100;
+  --color-orange-rgb: 255, 190, 40;
+  --color-yellow-rgb: 255, 215, 110;
+  --color-green-rgb: 64, 255, 170;
+  --color-cyan-rgb: 0, 234, 255;
+  --color-blue-rgb: 64, 156, 255;
+  --color-purple-rgb: 196, 110, 255;
+  --color-pink-rgb: 255, 46, 196;
+
+  /* Surfaces: the note is the scroll; sidebars sit deeper, popups rise. */
+  --background-primary: var(--ns-sumi);
+  --background-primary-alt: var(--ns-raised);
+  --background-secondary: var(--ns-deep);
+  --background-secondary-alt: var(--ns-raised);
+  --background-modifier-hover: rgba(232, 220, 198, 0.06);
+  --background-modifier-active-hover: rgba(255, 46, 196, 0.14);
+  --background-modifier-border: var(--ns-line);
+  --background-modifier-border-hover: var(--ns-ink);
+  --background-modifier-border-focus: var(--ns-magenta);
+  --background-modifier-error: var(--ns-red);
+  --background-modifier-error-rgb: 255, 56, 100;
+  --background-modifier-error-hover: #ff6a8a;
+  --background-modifier-success: var(--ns-mint);
+  --background-modifier-success-rgb: 64, 255, 170;
+  --background-modifier-message: var(--ns-raised);
+  --background-modifier-form-field: var(--ns-deep);
+
+  /* Interactive: follows the accent (magenta unless changed in Settings) */
+  --interactive-normal: var(--ns-raised);
+  --interactive-hover: var(--color-base-25);
+  --interactive-accent: var(--color-accent);
+  --interactive-accent-hover: var(--color-accent-1);
+
+  /* Text */
+  --text-normal: var(--ns-paper);
+  --text-muted: var(--ns-stone);
+  --text-faint: var(--ns-ink);
+  --text-on-accent: var(--ns-sumi);
+  --text-on-accent-inverted: var(--ns-bright);
+  --text-success: var(--ns-mint);
+  --text-warning: var(--ns-amber);
+  --text-error: var(--ns-red);
+  --text-accent: var(--color-accent);
+  --text-accent-hover: var(--color-accent-1);
+  --text-selection: var(--ns-selection);
+  --text-highlight-bg: rgba(255, 190, 40, 0.2);
+  --caret-color: var(--ns-magenta);
+
+  /* Emphasis */
+  --bold-color: var(--ns-bright);
+}
+
+
+/* --------------------------------------------------------------------------
+   4. Editor variables
+   -------------------------------------------------------------------------- */
+
+.theme-dark,
+.theme-light {
+  /* Inline title: the note's name is static, so it stays paper */
+  --inline-title-color: var(--ns-bright);
+  --inline-title-weight: 700;
+
+  /* Headings: a cool sweep of neon, magenta at the top */
+  --heading-formatting: var(--ns-ink);
+  --h1-color: var(--ns-magenta);
+  --h2-color: var(--ns-violet);
+  --h3-color: var(--ns-blue);
+  --h4-color: var(--ns-cyan);
+  --h5-color: var(--ns-teal);
+  --h6-color: var(--ns-mint);
+  --h1-weight: 700;
+  --h2-weight: 700;
+  --h3-weight: 500;
+  --h4-weight: 500;
+  --h5-weight: 500;
+  --h6-weight: 500;
+
+  /* Links: internal magenta, external cyan, unresolved a dotted violet */
+  --link-color: var(--ns-magenta);
+  --link-color-hover: var(--ns-bright);
+  --link-decoration: none;
+  --link-decoration-hover: underline;
+  --link-external-color: var(--ns-cyan);
+  --link-external-color-hover: var(--ns-bright);
+  --link-external-decoration: none;
+  --link-external-decoration-hover: underline;
+  --link-unresolved-color: var(--ns-violet);
+  --link-unresolved-opacity: 0.75;
+  --link-unresolved-decoration-style: dotted;
+  --link-unresolved-decoration-color: rgba(196, 110, 255, 0.5);
+
+  /* Tags: amber pill with a neon border */
+  --tag-color: var(--ns-amber);
+  --tag-color-hover: #ffd76e;
+  --tag-background: rgba(255, 190, 40, 0.07);
+  --tag-background-hover: rgba(255, 190, 40, 0.14);
+  --tag-border-color: rgba(255, 190, 40, 0.45);
+  --tag-border-color-hover: rgba(255, 190, 40, 0.8);
+  --tag-border-width: 1px;
+  --tag-radius: 999px;
+  --tag-padding-x: 0.6em;
+  --tag-padding-y: 0.1em;
+  --tag-weight: 500;
+  --tag-decoration: none;
+  --tag-decoration-hover: none;
+
+  /* Code: deep surface, neon tokens */
+  --code-background: var(--ns-deep);
+  --code-normal: var(--ns-soft);
+  --code-comment: var(--ns-stone);
+  --code-punctuation: var(--color-base-50);
+  --code-keyword: var(--ns-magenta);
+  --code-function: var(--ns-blue);
+  --code-operator: var(--ns-violet);
+  --code-property: var(--ns-cyan);
+  --code-string: var(--ns-mint);
+  --code-tag: var(--ns-teal);
+  --code-value: var(--ns-amber);
+  --code-important: var(--ns-red);
+
+  /* Blockquote: a single ink rule */
+  --blockquote-border-color: var(--ns-ink);
+  --blockquote-border-thickness: 2px;
+  --blockquote-color: var(--ns-soft);
+  --blockquote-background-color: transparent;
+
+  /* Horizontal rule */
+  --hr-color: var(--ns-ink);
+  --hr-thickness: 1px;
+
+  /* Lists */
+  --list-marker-color: var(--ns-ink);
+  --list-marker-color-hover: var(--ns-magenta);
+  --list-marker-color-collapsed: var(--ns-magenta);
+
+  /* Checkboxes: magenta when checked, done items fade to stone */
+  --checkbox-color: var(--ns-magenta);
+  --checkbox-color-hover: var(--ns-violet);
+  --checkbox-marker-color: var(--ns-sumi);
+  --checkbox-border-color: var(--ns-ink);
+  --checkbox-border-color-hover: var(--ns-magenta);
+  --checklist-done-color: var(--ns-stone);
+  --checklist-done-decoration: line-through;
+
+  /* Tables */
+  --table-border-color: var(--ns-line);
+  --table-header-background: var(--ns-raised);
+  --table-header-background-hover: var(--color-base-20);
+  --table-header-border-color: var(--ns-line);
+  --table-header-color: var(--ns-bright);
+  --table-header-weight: 500;
+  --table-text-color: var(--ns-paper);
+  --table-row-alt-background: rgba(232, 220, 198, 0.018);
+  --table-row-background-hover: rgba(232, 220, 198, 0.04);
+  --table-row-alt-background-hover: rgba(232, 220, 198, 0.04);
+  --table-selection: rgba(255, 46, 196, 0.14);
+  --table-selection-border-color: var(--ns-magenta);
+  --table-drag-handle-color-active: var(--ns-sumi);
+  --table-drag-handle-background-active: var(--ns-magenta);
+
+  /* Indentation guides */
+  --indentation-guide-color: var(--ns-line);
+  --indentation-guide-color-active: var(--ns-ink);
+
+  /* Embeds and properties */
+  --embed-border-start: 2px solid var(--ns-line);
+  --metadata-divider-color: var(--ns-line);
+  --metadata-label-text-color: var(--ns-stone);
+  --metadata-input-text-color: var(--ns-paper);
+}
+
+
+/* --------------------------------------------------------------------------
+   5. Window variables — quiet ink UI
+   -------------------------------------------------------------------------- */
+
+.theme-dark,
+.theme-light {
+  /* Window frame */
+  --titlebar-background: var(--ns-deep);
+  --titlebar-background-focused: var(--ns-deep);
+  --titlebar-border-color: var(--ns-line);
+  --titlebar-text-color: var(--ns-ink);
+  --titlebar-text-color-focused: var(--ns-stone);
+
+  /* Ribbon */
+  --ribbon-background: var(--ns-deep);
+  --ribbon-background-collapsed: var(--ns-deep);
+
+  /* Dividers between panes: ink at rest, magenta while dragging */
+  --divider-color: var(--ns-line);
+  --divider-color-hover: var(--ns-magenta);
+
+  /* Tab headers */
+  --tab-container-background: var(--ns-deep);
+  --tab-background-active: var(--ns-sumi);
+  --tab-text-color: var(--ns-ink);
+  --tab-text-color-active: var(--ns-stone);
+  --tab-text-color-focused: var(--ns-stone);
+  --tab-text-color-focused-active: var(--ns-soft);
+  --tab-text-color-focused-active-current: var(--ns-bright);
+  --tab-text-color-focused-highlighted: var(--ns-magenta);
+  --tab-divider-color: var(--ns-line);
+  --tab-outline-color: var(--ns-line);
+
+  /* File explorer and other nav trees */
+  --nav-item-color: var(--ns-stone);
+  --nav-item-color-hover: var(--ns-paper);
+  --nav-item-color-active: var(--ns-magenta);
+  --nav-item-color-selected: var(--ns-bright);
+  --nav-item-color-highlighted: var(--ns-magenta);
+  --nav-item-background-hover: rgba(232, 220, 198, 0.05);
+  --nav-item-background-active: rgba(255, 46, 196, 0.08);
+  --nav-item-background-selected: rgba(255, 46, 196, 0.14);
+  --nav-collapse-icon-color: var(--ns-ink);
+  --nav-collapse-icon-color-collapsed: var(--ns-ink);
+  --nav-indentation-guide-color: var(--ns-line);
+  --nav-heading-color: var(--ns-soft);
+  --nav-heading-color-hover: var(--ns-paper);
+
+  /* Status bar */
+  --status-bar-background: var(--ns-deep);
+  --status-bar-border-color: var(--ns-line);
+  --status-bar-text-color: var(--ns-stone);
+
+  /* Scrollbars: a line of ink, magenta while dragged */
+  --scrollbar-bg: transparent;
+  --scrollbar-thumb-bg: var(--ns-line);
+  --scrollbar-active-thumb-bg: rgba(255, 46, 196, 0.5);
+
+  /* Modals and prompts */
+  --modal-background: var(--ns-raised);
+  --modal-border-color: var(--ns-line);
+  --prompt-border-color: var(--ns-line);
+
+  /* Graph view */
+  --graph-text: var(--ns-soft);
+  --graph-line: var(--ns-ink);
+  --graph-node: var(--ns-paper);
+  --graph-node-unresolved: var(--ns-stone);
+  --graph-node-focused: var(--ns-magenta);
+  --graph-node-tag: var(--ns-amber);
+  --graph-node-attachment: var(--ns-teal);
+}
+
+
+/* --------------------------------------------------------------------------
+   6. Rules
+   Selectors below target Obsidian's rendered DOM (reading view and the
+   CodeMirror editor); the variables above do the rest.
+   -------------------------------------------------------------------------- */
+
+/* ---- Heading glow: h1 and h2 only ---- */
+
+.markdown-rendered h1,
+.markdown-source-view.mod-cm6 .cm-header-1 {
+  text-shadow: var(--ns-glow-magenta);
+}
+
+.markdown-rendered h2,
+.markdown-source-view.mod-cm6 .cm-header-2 {
+  text-shadow: var(--ns-glow-violet);
+}
+
+/* The "#" markers stay plain ink */
+.markdown-source-view.mod-cm6 .cm-formatting-header {
+  text-shadow: none;
+}
+
+/* ---- Link glow ---- */
+
+.markdown-rendered a.internal-link,
+.markdown-source-view.mod-cm6 .cm-hmd-internal-link {
+  text-shadow: var(--ns-glow-magenta);
+}
+
+.markdown-rendered a.external-link,
+.markdown-source-view.mod-cm6 .cm-link {
+  text-shadow: var(--ns-glow-cyan);
+}
+
+/* An unresolved link points at nothing yet: no light in the tube */
+.markdown-rendered a.internal-link.is-unresolved,
+.markdown-source-view.mod-cm6 .is-unresolved,
+.markdown-source-view.mod-cm6 .is-unresolved .cm-hmd-internal-link {
+  text-shadow: none;
+}
+
+/* ---- Tags: pill + faint glow ---- */
+
+.markdown-rendered a.tag,
+.markdown-source-view.mod-cm6 .cm-hashtag {
+  text-shadow: var(--ns-glow-amber);
+}
+
+.markdown-rendered a.tag {
+  box-shadow: 0 0 6px rgba(255, 190, 40, 0.16);
+}
+
+/* ---- Cursor ---- */
+
+.markdown-source-view.mod-cm6 .cm-cursor,
+.markdown-source-view.mod-cm6 .cm-dropCursor {
+  box-shadow: 0 0 6px rgba(255, 46, 196, 0.55);
+}
+
+/* ---- Checkboxes: a checked box is a lit one ---- */
+
+input[type="checkbox"]:checked {
+  box-shadow: 0 0 6px rgba(255, 46, 196, 0.4);
+}
+
+/* ---- Code blocks: a hairline frame on the deep surface ---- */
+
+.markdown-rendered pre {
+  border: 1px solid var(--ns-line);
+}
+
+.markdown-rendered .token.comment,
+.markdown-source-view.mod-cm6 .cm-comment {
+  font-style: italic;
+}
+
+/* ---- Callouts ----
+   Styled directly with a per-type RGB triplet (--ns-callout-rgb) instead of
+   Obsidian's --callout-color, whose format changed in 1.13 (RGB triplet
+   before, any CSS colour after). This works on both sides of that change.
+   Consequence: snippets that recolour callouts via --callout-color are
+   overridden by this block. */
+
+.callout {
+  --ns-callout-rgb: 64, 156, 255;                /* default, note: blue */
+  background-color: rgba(var(--ns-callout-rgb), 0.07);
+  border: 1px solid rgba(var(--ns-callout-rgb), 0.32);
+  border-left-width: 2px;
+}
+
+.callout-title,
+.callout-icon,
+.callout-fold {
+  color: rgb(var(--ns-callout-rgb));
+}
+
+.callout-title {
+  text-shadow: 0 0 7px rgba(var(--ns-callout-rgb), 0.42),
+    0 0 2px rgba(var(--ns-callout-rgb), 0.25);
+}
+
+.callout-content {
+  color: var(--text-normal);
+  text-shadow: none;
+}
+
+.callout[data-callout="note"] {
+  --ns-callout-rgb: 64, 156, 255;                /* blue */
+}
+
+.callout[data-callout="abstract"],
+.callout[data-callout="summary"],
+.callout[data-callout="tldr"],
+.callout[data-callout="tip"],
+.callout[data-callout="hint"] {
+  --ns-callout-rgb: 0, 255, 204;                 /* teal */
+}
+
+.callout[data-callout="info"],
+.callout[data-callout="todo"] {
+  --ns-callout-rgb: 0, 234, 255;                 /* cyan */
+}
+
+.callout[data-callout="important"] {
+  --ns-callout-rgb: 255, 46, 196;                /* magenta */
+}
+
+.callout[data-callout="success"],
+.callout[data-callout="check"],
+.callout[data-callout="done"] {
+  --ns-callout-rgb: 64, 255, 170;                /* mint */
+}
+
+.callout[data-callout="question"],
+.callout[data-callout="help"],
+.callout[data-callout="faq"],
+.callout[data-callout="example"] {
+  --ns-callout-rgb: 196, 110, 255;               /* violet */
+}
+
+.callout[data-callout="warning"],
+.callout[data-callout="caution"],
+.callout[data-callout="attention"] {
+  --ns-callout-rgb: 255, 190, 40;                /* amber */
+}
+
+.callout[data-callout="failure"],
+.callout[data-callout="fail"],
+.callout[data-callout="missing"],
+.callout[data-callout="danger"],
+.callout[data-callout="error"],
+.callout[data-callout="bug"] {
+  --ns-callout-rgb: 255, 56, 100;                /* red */
+}
+
+/* A quote is static: stone, no glow */
+.callout[data-callout="quote"],
+.callout[data-callout="cite"] {
+  --ns-callout-rgb: 146, 134, 120;
+}
+
+.callout[data-callout="quote"] .callout-title,
+.callout[data-callout="cite"] .callout-title {
+  text-shadow: none;
+}
+
+/* ---- Active tab: a thin magenta tube along the top edge ---- */
+
+.workspace .mod-root .workspace-tabs.mod-active .workspace-tab-header.is-active {
+  box-shadow: inset 0 1px 0 var(--ns-magenta);
+}

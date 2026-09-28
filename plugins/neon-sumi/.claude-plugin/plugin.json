@@ -1,0 +1,17 @@
+{
+  "name": "neon-sumi",
+  "version": "1.0.0",
+  "description": "A status line and cockpit for Claude Code: context, 5h and weekly bars, PR / ticket / issue rows with titles, worktrees, ports that serve a page. Neon tubes on an ink-wash scroll.",
+  "license": "MIT",
+  "keywords": [
+    "statusline",
+    "status line",
+    "theme",
+    "cockpit",
+    "ghostty",
+    "iterm2"
+  ],
+  "author": {
+    "name": "Danneftw1"
+  }
+}

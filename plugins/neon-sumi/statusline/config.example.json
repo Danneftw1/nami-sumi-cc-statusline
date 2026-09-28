@@ -1,0 +1,30 @@
+{
+  "_about": "Copy to config.json next to statusline.py. Every key is optional.",
+  "edition": "auto",
+  "guide_url": "",
+  "vaults": [
+    {"path": "~/notes", "name": "notes"}
+  ],
+  "repos": {
+    "your-name/your-repo": [
+      {"label": "board", "kind": "board", "url": "https://github.com/users/your-name/projects/1"},
+      {"label": "Vercel", "kind": "vercel", "url": "https://vercel.com/your-team/your-repo"},
+      {"label": "v0 chat", "kind": "v0", "url": "https://v0.app/chat"}
+    ]
+  },
+  "boards": {
+    "your-name": [
+      {"label": "Roadmap", "number": 1, "url": "https://github.com/users/your-name/projects/1"}
+    ]
+  },
+  "services": [
+    {"label": "GitHub", "kind": "github", "url": "https://github.com"},
+    {"label": "Vercel", "kind": "vercel", "url": "https://vercel.com/dashboard"},
+    {"label": "v0", "kind": "v0", "url": "https://v0.app/chat"}
+  ],
+  "resources": [
+    {"label": "status line docs", "url": "https://code.claude.com/docs/en/statusline"},
+    {"label": "OTel monitoring", "url": "https://code.claude.com/docs/en/monitoring-usage"},
+    {"label": "CC changelog", "url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md"}
+  ]
+}

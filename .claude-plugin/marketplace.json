@@ -1,0 +1,12 @@
+{
+  "name": "neon-sumi",
+  "description": "Neon Sumi: a status line and cockpit for Claude Code. Neon tubes on an ink-wash scroll.",
+  "owner": { "name": "Danneftw1" },
+  "plugins": [
+    {
+      "name": "neon-sumi",
+      "source": "./plugins/neon-sumi",
+      "description": "Installs the Neon Sumi status line, subagent line and cockpit, with an optional Ghostty shader."
+    }
+  ]
+}

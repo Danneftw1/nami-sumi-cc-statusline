@@ -1,0 +1,56 @@
+# Neon Sumi for Ghostty.
+#
+# Turn on:   add one line to ~/.config/ghostty/config
+#              config-file = ~/.claude/neon-sumi/ghostty/neon-sumi.ghostty
+#            and reload (cmd+shift+,). Turn off: delete that line.
+#
+# Everything here is Ghostty-only in effect: iTerm2 has no custom shaders,
+# no P3 window colorspace switch and draws box/block glyphs from the font.
+
+font-family = Maple Mono NF
+font-size = 16
+font-thicken = true
+adjust-cell-height = 12%
+
+# Sumi ink ground, rice-paper text, neon for everything that is live.
+background = #0f0c0d
+foreground = #e8dcc6
+cursor-color = #ff2ec4
+cursor-style = bar
+selection-background = #3a1830
+selection-foreground = #f7efe2
+palette = 0=#1a1516
+palette = 1=#ff3864
+palette = 2=#40ffaa
+palette = 3=#ffbe28
+palette = 4=#409cff
+palette = 5=#ff2ec4
+palette = 6=#00eaff
+palette = 7=#e8dcc6
+palette = 8=#544a46
+palette = 9=#ff6a8a
+palette = 10=#7dffc4
+palette = 11=#ffd76e
+palette = 12=#7ab8ff
+palette = 13=#c46eff
+palette = 14=#00ffcc
+palette = 15=#f7efe2
+
+# Most Mac screens are Display P3: the same hex values come out hotter.
+window-colorspace = display-p3
+alpha-blending = linear-corrected
+minimum-contrast = 1.1
+
+# A little glass behind the ink.
+background-opacity = 0.93
+background-blur = 24
+macos-titlebar-style = transparent
+window-padding-x = 16
+window-padding-y = 12
+window-padding-balance = true
+unfocused-split-opacity = 0.85
+
+# The light: bloom, current, sumi grain, cursor comet. Animates only while
+# the window is focused; set to false for a still glow and less GPU.
+custom-shader = ~/.claude/neon-sumi/ghostty/neon-sumi.glsl
+custom-shader-animation = true

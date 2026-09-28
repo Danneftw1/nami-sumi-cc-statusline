@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neon Sumi · Obsidian preview</title>
+<meta name="description" content="A mock Obsidian window showing the Neon Sumi theme: warm ink and rice paper, with neon reserved for what is live.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Neon Sumi palette — same values as theme/theme.css */
+  :root {
+    color-scheme: dark;
+
+    --ns-sumi: #0f0c0d;
+    --ns-raised: #171314;
+    --ns-deep: #0b090a;
+    --ns-line: #2c2426;
+    --ns-ink: #544a46;
+    --ns-stone: #928678;
+    --ns-soft: #cbbfa9;
+    --ns-paper: #e8dcc6;
+    --ns-bright: #f7efe2;
+    --ns-punct: #73685f;
+
+    --ns-magenta: #ff2ec4;
+    --ns-violet: #c46eff;
+    --ns-teal: #00ffcc;
+    --ns-cyan: #00eaff;
+    --ns-blue: #409cff;
+    --ns-mint: #40ffaa;
+    --ns-amber: #ffbe28;
+    --ns-red: #ff3864;
+    --ns-selection: #3a1830;
+
+    --ns-glow-magenta: 0 0 7px rgba(255, 46, 196, .42), 0 0 2px rgba(255, 46, 196, .25);
+    --ns-glow-violet: 0 0 7px rgba(196, 110, 255, .42), 0 0 2px rgba(196, 110, 255, .25);
+    --ns-glow-cyan: 0 0 7px rgba(0, 234, 255, .36), 0 0 2px rgba(0, 234, 255, .22);
+    --ns-glow-amber: 0 0 7px rgba(255, 190, 40, .36), 0 0 2px rgba(255, 190, 40, .22);
+
+    /* Terminal ANSI 0–15 */
+    --a0: #1a1516;  --a1: #ff3864;  --a2: #40ffaa;  --a3: #ffbe28;
+    --a4: #409cff;  --a5: #ff2ec4;  --a6: #00eaff;  --a7: #e8dcc6;
+    --a8: #544a46;  --a9: #ff6a8a;  --a10: #7dffc4; --a11: #ffd76e;
+    --a12: #7ab8ff; --a13: #c46eff; --a14: #00ffcc; --a15: #f7efe2;
+
+    --font-text: "Zen Kaku Gothic New", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "Maple Mono NF", "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; }
+
+  body {
+    min-height: 100vh;
+    font-family: var(--font-text);
+    color: var(--ns-paper);
+    background:
+      radial-gradient(1100px 620px at 12% -8%, rgba(84, 74, 70, .34), transparent 62%),
+      radial-gradient(900px 520px at 108% 18%, rgba(58, 24, 48, .5), transparent 60%),
+      radial-gradient(800px 420px at 40% 112%, rgba(44, 36, 38, .7), transparent 70%),
+      var(--ns-deep);
+    -webkit-font-smoothing: antialiased;
+    padding: 56px 24px 72px;
+  }
+
+  /* Rice-paper grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .91 0 0 0 0 .86 0 0 0 0 .78 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: 0;
+  }
+
+  .page { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; }
+
+  /* ---------- Hero ---------- */
+
+  .hero { margin: 0 0 36px 4px; }
+
+  .eyebrow {
+    margin: 0 0 10px;
+    font: 500 12px/1 var(--font-mono);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ns-ink);
+  }
+
+  .wordmark {
+    margin: 0;
+    font-size: clamp(40px, 7vw, 68px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -.01em;
+    color: var(--ns-bright);
+  }
+
+  .wordmark .tube {
+    color: var(--ns-magenta);
+    text-shadow: 0 0 18px rgba(255, 46, 196, .45), 0 0 4px rgba(255, 46, 196, .35);
+  }
+
+  .tagline {
+    margin: 14px 0 0;
+    font-size: 17px;
+    color: var(--ns-stone);
+  }
+
+  /* ---------- Window ---------- */
+
+  .window {
+    display: grid;
+    grid-template-columns: 44px 248px minmax(0, 1fr);
+    grid-template-rows: 40px minmax(0, 1fr) 26px;
+    grid-template-areas:
+      "top top top"
+      "ribbon side main"
+      "status status status";
+    background: var(--ns-sumi);
+    border: 1px solid var(--ns-line);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+      0 40px 90px rgba(0, 0, 0, .65),
+      0 0 140px rgba(255, 46, 196, .05);
+    font-size: 14px;
+  }
+
+  svg.i {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex: none;
+  }
+
+  /* Top strip: traffic lights, sidebar header, tabs */
+  .top {
+    grid-area: top;
+    display: grid;
+    grid-template-columns: 292px minmax(0, 1fr);
+    background: var(--ns-deep);
+    border-bottom: 1px solid var(--ns-line);
+  }
+
+  .top-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 12px 0 14px;
+    border-right: 1px solid var(--ns-line);
+    color: var(--ns-ink);
+  }
+
+  .lights { display: flex; gap: 8px; margin-right: auto; }
+  .lights span {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--ns-line);
+    box-shadow: inset 0 0 0 1px rgba(84, 74, 70, .6);
+  }
+
+  .top-left .active-icon { color: var(--ns-soft); }
+
+  .tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 0 10px;
+    min-width: 0;
+  }
+
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px 8px 0 0;
+    color: var(--ns-ink);
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .tab .label { overflow: hidden; text-overflow: ellipsis; }
+
+  .tab.is-active {
+    background: var(--ns-sumi);
+    color: var(--ns-bright);
+    box-shadow: inset 0 1px 0 var(--ns-magenta);
+    border: 1px solid var(--ns-line);
+    border-bottom: 0;
+  }
+
+  .tab svg.i { width: 14px; height: 14px; color: var(--ns-ink); }
+  .tabs > svg.i { align-self: center; margin-left: 6px; color: var(--ns-ink); }
+
+  /* Ribbon */
+  .ribbon {
+    grid-area: ribbon;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    background: var(--ns-deep);
+    border-right: 1px solid var(--ns-line);
+    color: var(--ns-ink);
+  }
+
+  .ribbon .spacer { flex: 1; }
+
+  /* File explorer */
+  .side {
+    grid-area: side;
+    background: var(--ns-deep);
+    border-right: 1px solid var(--ns-line);
+    padding: 10px 8px;
+    color: var(--ns-stone);
+  }
+
+  .nav-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 4px 0 12px;
+    color: var(--ns-ink);
+  }
+
+  .nav-actions svg.i { width: 16px; height: 16px; }
+
+  .tree { list-style: none; margin: 0; padding: 0; }
+  .tree ul { list-style: none; margin: 0 0 4px 13px; padding: 0 0 0 10px; border-left: 1px solid var(--ns-line); }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .item svg.i { width: 14px; height: 14px; color: var(--ns-ink); }
+  .item.folder { color: var(--ns-soft); }
+  .item.file { padding-left: 10px; }
+
+  .item.is-active {
+    color: var(--ns-magenta);
+    background: rgba(255, 46, 196, .08);
+    text-shadow: var(--ns-glow-magenta);
+  }
+
+  /* Main column */
+  .main {
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .view-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 16px;
+    color: var(--ns-stone);
+    font-size: 13px;
+  }
+
+  .view-header .sep { color: var(--ns-ink); }
+  .view-header .here { color: var(--ns-soft); }
+
+  /* ---------- The note ---------- */
+
+  .note {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 18px 40px 44px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ns-paper);
+  }
+
+  .note h1, .note h2, .note h3 { line-height: 1.25; margin: 1.3em 0 .45em; }
+
+  .note h1 {
+    margin-top: .2em;
+    font-size: 2.1em;
+    font-weight: 700;
+    color: var(--ns-magenta);
+    text-shadow: var(--ns-glow-magenta);
+  }
+
+  .note h2 {
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--ns-violet);
+    text-shadow: var(--ns-glow-violet);
+  }
+
+  .note h3 {
+    font-size: 1.3em;
+    font-weight: 500;
+    color: var(--ns-blue);
+  }
+
+  .note p { margin: 0 0 1em; }
+  .note strong { color: var(--ns-bright); font-weight: 700; }
+
+  a { text-decoration: none; }
+
+  .internal-link {
+    color: var(--ns-magenta);
+    text-shadow: var(--ns-glow-magenta);
+  }
+
+  .external-link {
+    color: var(--ns-cyan);
+    text-shadow: var(--ns-glow-cyan);
+    white-space: nowrap;
+  }
+
+  .external-link svg.i { width: 12px; height: 12px; vertical-align: -1px; margin-left: 1px; stroke-width: 2.2; }
+
+  .is-unresolved {
+    color: var(--ns-violet);
+    opacity: .75;
+    text-decoration: underline dotted rgba(196, 110, 255, .5);
+    text-underline-offset: 3px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: .1em .6em;
+    margin-right: .3em;
+    border: 1px solid rgba(255, 190, 40, .45);
+    border-radius: 999px;
+    background: rgba(255, 190, 40, .07);
+    color: var(--ns-amber);
+    font-size: .875em;
+    font-weight: 500;
+    line-height: 1.5;
+    text-shadow: var(--ns-glow-amber);
+    box-shadow: 0 0 6px rgba(255, 190, 40, .16);
+  }
+
+  .sel { background: var(--ns-selection); border-radius: 2px; }
+
+  .caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.15em;
+    margin: 0 1px;
+    vertical-align: -.2em;
+    background: var(--ns-magenta);
+    box-shadow: 0 0 6px rgba(255, 46, 196, .55);
+  }
+
+  /* Callout (tip → teal) */
+  .callout {
+    margin: 1.2em 0;
+    padding: 12px 16px 12px 14px;
+    border: 1px solid rgba(0, 255, 204, .32);
+    border-left-width: 2px;
+    border-radius: 6px;
+    background: rgba(0, 255, 204, .07);
+  }
+
+  .callout-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--ns-teal);
+    text-shadow: 0 0 7px rgba(0, 255, 204, .42), 0 0 2px rgba(0, 255, 204, .25);
+  }
+
+  .callout-title svg.i { width: 17px; height: 17px; }
+  .callout-content { margin-top: 4px; color: var(--ns-paper); }
+
+  /* Checklist */
+  .tasks { list-style: none; margin: 0 0 1em; padding: 0; }
+  .tasks li { display: flex; align-items: center; gap: 10px; padding: 3px 0; }
+
+  .box {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--ns-ink);
+    display: grid;
+    place-items: center;
+  }
+
+  .done .box {
+    border-color: var(--ns-magenta);
+    background: var(--ns-magenta);
+    box-shadow: 0 0 6px rgba(255, 46, 196, .4);
+  }
+
+  .done .box svg { width: 11px; height: 11px; stroke: var(--ns-sumi); stroke-width: 3.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .done .text { color: var(--ns-stone); text-decoration: line-through; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; margin: 0 0 1.2em; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 15px;
+  }
+
+  th, td {
+    padding: 7px 14px;
+    border: 1px solid var(--ns-line);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th {
+    background: var(--ns-raised);
+    color: var(--ns-bright);
+    font-weight: 500;
+  }
+
+  tbody tr:nth-child(even) td { background: rgba(232, 220, 198, .018); }
+  td.num { font-family: var(--font-mono); font-size: 14px; color: var(--ns-soft); }
+
+  /* Code */
+  code { font-family: var(--font-mono); }
+
+  .inline-code {
+    padding: .1em .35em;
+    border-radius: 4px;
+    background: var(--ns-deep);
+    color: var(--ns-soft);
+    font-size: .88em;
+  }
+
+  pre {
+    margin: 0 0 1.2em;
+    padding: 14px 18px;
+    border: 1px solid var(--ns-line);
+    border-radius: 6px;
+    background: var(--ns-deep);
+    color: var(--ns-soft);
+    font: 13.5px/1.65 var(--font-mono);
+    overflow-x: auto;
+  }
+
+  .t-com { color: var(--ns-stone); font-style: italic; }
+  .t-kw { color: var(--ns-magenta); }
+  .t-fn { color: var(--ns-blue); }
+  .t-op { color: var(--ns-violet); }
+  .t-prop { color: var(--ns-cyan); }
+  .t-str { color: var(--ns-mint); }
+  .t-num { color: var(--ns-amber); }
+  .t-pun { color: var(--ns-punct); }
+
+  /* ---------- Terminal pane ---------- */
+
+  .term-pane {
+    margin-top: auto;
+    border-top: 1px solid var(--ns-line);
+    background: var(--ns-sumi);
+  }
+
+  .term-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 14px;
+    background: var(--ns-deep);
+    border-bottom: 1px solid var(--ns-line);
+    color: var(--ns-soft);
+    font-size: 13px;
+  }
+
+  .term-header svg.i { width: 15px; height: 15px; color: var(--ns-magenta); }
+  .term-header .dim { color: var(--ns-ink); }
+
+  .term-body { padding: 10px; }
+
+  .term {
+    margin: 0;
+    padding: 12px 14px;
+    background: var(--ns-sumi);
+    color: var(--a7);
+    font: 13px/1.55 var(--font-mono);
+    white-space: pre;
+    overflow-x: auto;
+    box-shadow: 0 0 0 1px rgba(255, 46, 196, .28), 0 0 8px rgba(255, 46, 196, .16);
+  }
+
+  .c1 { color: var(--a1); }  .c2 { color: var(--a2); }  .c3 { color: var(--a3); }
+  .c4 { color: var(--a4); }  .c5 { color: var(--a5); }  .c6 { color: var(--a6); }
+  .c8 { color: var(--a8); }  .c13 { color: var(--a13); } .c14 { color: var(--a14); }
+
+  .sw { display: inline-block; width: 2.4ch; height: 1.1em; vertical-align: -.2em; margin-right: .4ch; border-radius: 2px; }
+
+  .term-cursor {
+    display: inline-block;
+    width: .62em;
+    height: 1.2em;
+    vertical-align: -.25em;
+    background: var(--ns-magenta);
+    box-shadow: 0 0 6px rgba(255, 46, 196, .55);
+  }
+
+  /* Status bar */
+  .status {
+    grid-area: status;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    padding: 0 16px;
+    background: var(--ns-deep);
+    border-top: 1px solid var(--ns-line);
+    color: var(--ns-stone);
+    font-size: 12px;
+  }
+
+  /* ---------- Palette strip ---------- */
+
+  .palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+    gap: 10px;
+    margin-top: 40px;
+  }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--ns-line);
+    border-radius: 8px;
+    background: rgba(15, 12, 13, .7);
+  }
+
+  .chip i {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(247, 239, 226, .08);
+  }
+
+  .chip.neon i { box-shadow: 0 0 10px var(--c); }
+  .chip b { display: block; font-size: 12px; font-weight: 500; color: var(--ns-soft); }
+  .chip code { display: block; font-size: 11px; color: var(--ns-ink); }
+
+  .foot {
+    margin: 28px 4px 0;
+    font-size: 13px;
+    color: var(--ns-ink);
+  }
+
+  /* ---------- Narrow screens ---------- */
+
+  @media (max-width: 980px) {
+    .window { grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: "top top" "ribbon main" "status status"; }
+    .side { display: none; }
+    .top { grid-template-columns: 44px minmax(0, 1fr); }
+    .top-left > :not(.lights) { display: none; }
+    .top-left { padding: 0; justify-content: center; }
+    .lights { margin: 0; gap: 4px; }
+    .lights span { width: 8px; height: 8px; }
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 32px 16px 48px; }
+    .window { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "main" "status"; border-radius: 10px; }
+    .ribbon { display: none; }
+    .top { grid-template-columns: minmax(0, 1fr); }
+    .top-left { display: none; }
+    .tab:not(.is-active), .tabs > svg.i { display: none; }
+    .note { padding: 12px 18px 32px; font-size: 15px; }
+    .status span:nth-child(n+2) { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <p class="eyebrow">Obsidian theme · preview</p>
+    <h1 class="wordmark"><span class="tube">Neon</span> Sumi</h1>
+    <p class="tagline">Neon tubes mounted on an ink-wash scroll.</p>
+  </header>
+
+  <div class="window">
+
+    <!-- Top strip -->
+    <div class="top">
+      <div class="top-left">
+        <div class="lights"><span></span><span></span><span></span></div>
+        <svg class="i active-icon" viewBox="0 0 24 24"><path d="M4 20V8a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v10Z"/></svg>
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <svg class="i" viewBox="0 0 24 24"><path d="M19 21 12 16 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg>
+      </div>
+      <div class="tabs">
+        <div class="tab is-active">
+          <span class="label">Autumn rail trip</span>
+          <svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </div>
+        <div class="tab">
+          <span class="label">Seed swap list</span>
+          <svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </div>
+        <svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+    </div>
+
+    <!-- Ribbon -->
+    <nav class="ribbon" aria-hidden="true">
+      <svg class="i" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+      <svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="10" cy="18" r="2.5"/><path d="M8.4 6.3 15.5 7.7M6.8 8.4l2.4 7.2M16.4 10l-4.8 6"/></svg>
+      <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <svg class="i" viewBox="0 0 24 24"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg>
+      <span class="spacer"></span>
+      <svg class="i" viewBox="0 0 24 24"><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg>
+    </nav>
+
+    <!-- File explorer -->
+    <aside class="side" aria-hidden="true">
+      <div class="nav-actions">
+        <svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <svg class="i" viewBox="0 0 24 24"><path d="M4 20V8a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v10Z"/><path d="M12 12v5M9.5 14.5h5"/></svg>
+        <svg class="i" viewBox="0 0 24 24"><path d="M3 6h13M3 12h9M3 18h5M18 8v12M15 17l3 3 3-3"/></svg>
+        <svg class="i" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg>
+      </div>
+      <ul class="tree">
+        <li>
+          <div class="item folder"><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>Garden</div>
+          <ul>
+            <li><div class="item file">Spring planting plan</div></li>
+            <li><div class="item file">Seed swap list</div></li>
+            <li><div class="item file">Tomato trellis</div></li>
+          </ul>
+        </li>
+        <li>
+          <div class="item folder"><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>Travel</div>
+          <ul>
+            <li><div class="item file is-active">Autumn rail trip</div></li>
+            <li><div class="item file">Packing list</div></li>
+            <li><div class="item file">Night trains</div></li>
+          </ul>
+        </li>
+        <li><div class="item folder"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>Recipes</div></li>
+        <li><div class="item file">Inbox</div></li>
+      </ul>
+    </aside>
+
+    <!-- Editor + terminal -->
+    <main class="main">
+      <div class="view-header">
+        <span>Travel</span><span class="sep">/</span><span class="here">Autumn rail trip</span>
+      </div>
+
+      <article class="note">
+        <h1>Autumn rail trip</h1>
+
+        <p>Four days along the coast by regional train. No car, one bag each, and a rule that every leg ends somewhere with a bakery. Gear lives in <a class="internal-link" href="#packing">Packing list</a>, fares come from the <a class="external-link" href="#timetable">regional timetable<svg class="i" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></svg></a>, and the ferry leg still waits on <a class="is-unresolved" href="#ferry">Ferry times</a>.</p>
+
+        <p><a class="tag" href="#travel">#travel</a><a class="tag" href="#slow">#slow-trip</a></p>
+
+        <h2>Route</h2>
+
+        <h3>Day one — harbour town</h3>
+
+        <p>Morning train out, lunch on the pier, then the <span class="sel">cliff path</span> while the light holds. The sleeper leaves at <strong>22:40</strong> from platform <code class="inline-code">3b</code>.<span class="caret"></span></p>
+
+        <div class="callout">
+          <div class="callout-title">
+            <svg class="i" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5Z"/></svg>
+            Book the sleeper early
+          </div>
+          <div class="callout-content">Couchettes sell out weeks ahead on autumn weekends. Ask for a lower berth on the window side.</div>
+        </div>
+
+        <h3>Before we go</h3>
+
+        <ul class="tasks">
+          <li class="done"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span><span class="text">Rail passes</span></li>
+          <li class="done"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></span><span class="text">Sleeper couchettes</span></li>
+          <li><span class="box"></span><span class="text">Rain shells</span></li>
+          <li><span class="box"></span><span class="text">Offline maps</span></li>
+        </ul>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Day</th><th>From</th><th>To</th><th>Departs</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Fri</td><td>City</td><td>Harbour</td><td class="num">07:52</td></tr>
+              <tr><td>Sat</td><td>Harbour</td><td>Cliffs</td><td class="num">10:15</td></tr>
+              <tr><td>Sun</td><td>Cliffs</td><td>Lighthouse</td><td class="num">09:30</td></tr>
+              <tr><td>Mon</td><td>Lighthouse</td><td>City</td><td class="num">16:05</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+<pre><code><span class="t-com">// split the fares four ways</span>
+<span class="t-kw">const</span> legs <span class="t-op">=</span> <span class="t-pun">[</span>
+  <span class="t-pun">{</span> <span class="t-prop">from</span><span class="t-pun">:</span> <span class="t-str">"Harbour"</span><span class="t-pun">,</span> <span class="t-prop">to</span><span class="t-pun">:</span> <span class="t-str">"Cliffs"</span><span class="t-pun">,</span> <span class="t-prop">fare</span><span class="t-pun">:</span> <span class="t-num">18.5</span> <span class="t-pun">},</span>
+  <span class="t-pun">{</span> <span class="t-prop">from</span><span class="t-pun">:</span> <span class="t-str">"Cliffs"</span><span class="t-pun">,</span> <span class="t-prop">to</span><span class="t-pun">:</span> <span class="t-str">"Lighthouse"</span><span class="t-pun">,</span> <span class="t-prop">fare</span><span class="t-pun">:</span> <span class="t-num">12</span> <span class="t-pun">},</span>
+<span class="t-pun">];</span>
+
+<span class="t-kw">const</span> total <span class="t-op">=</span> legs<span class="t-pun">.</span><span class="t-fn">reduce</span><span class="t-pun">((</span>sum<span class="t-pun">,</span> leg<span class="t-pun">)</span> <span class="t-op">=&gt;</span> sum <span class="t-op">+</span> leg<span class="t-pun">.</span><span class="t-prop">fare</span><span class="t-pun">,</span> <span class="t-num">0</span><span class="t-pun">);</span>
+console<span class="t-pun">.</span><span class="t-fn">log</span><span class="t-pun">(</span><span class="t-str">`each: </span><span class="t-pun">${</span><span class="t-pun">(</span>total <span class="t-op">/</span> <span class="t-num">4</span><span class="t-pun">).</span><span class="t-fn">toFixed</span><span class="t-pun">(</span><span class="t-num">2</span><span class="t-pun">)}</span><span class="t-str">`</span><span class="t-pun">);</span></code></pre>
+      </article>
+
+      <section class="term-pane" aria-label="Terminal pane">
+        <div class="term-header">
+          <svg class="i" viewBox="0 0 24 24"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg>
+          Terminal <span class="dim">· zsh</span>
+        </div>
+        <div class="term-body">
+<pre class="term"><span class="c6">notes</span> <span class="c8">on</span> <span class="c13">main</span> <span class="c5">❯</span> git log --oneline -3
+<span class="c3">a1f3c9e</span> plan day two
+<span class="c3">7be0d21</span> add sleeper times
+<span class="c3">3c94e18</span> start trip note
+<span class="c6">notes</span> <span class="c8">on</span> <span class="c13">main</span> <span class="c5">❯</span> check-links
+<span class="c2">✓</span> 14 links resolve
+<span class="c3">!</span> 1 unresolved  <span class="c8">→</span> <span class="c13">Ferry times</span>
+<span class="c1">✗</span> 1 missing attachment  <span class="c8">→</span> <span class="c4">cliff-path.jpg</span>
+<span class="c6">notes</span> <span class="c8">on</span> <span class="c13">main</span> <span class="c5">❯</span> palette
+<span class="sw" style="background:var(--a0)"></span><span class="sw" style="background:var(--a1)"></span><span class="sw" style="background:var(--a2)"></span><span class="sw" style="background:var(--a3)"></span><span class="sw" style="background:var(--a4)"></span><span class="sw" style="background:var(--a5)"></span><span class="sw" style="background:var(--a6)"></span><span class="sw" style="background:var(--a7)"></span>
+<span class="sw" style="background:var(--a8)"></span><span class="sw" style="background:var(--a9)"></span><span class="sw" style="background:var(--a10)"></span><span class="sw" style="background:var(--a11)"></span><span class="sw" style="background:var(--a12)"></span><span class="sw" style="background:var(--a13)"></span><span class="sw" style="background:var(--a14)"></span><span class="sw" style="background:var(--a15)"></span>
+<span class="c6">notes</span> <span class="c8">on</span> <span class="c13">main</span> <span class="c5">❯</span> <span class="term-cursor"></span></pre>
+        </div>
+      </section>
+    </main>
+
+    <!-- Status bar -->
+    <footer class="status">
+      <span>3 backlinks</span>
+      <span>184 words</span>
+      <span>1 062 characters</span>
+    </footer>
+  </div>
+
+  <!-- Palette -->
+  <section class="palette" aria-label="Palette">
+    <div class="chip"><i style="background:#0f0c0d"></i><span><b>sumi</b><code>#0f0c0d</code></span></div>
+    <div class="chip"><i style="background:#171314"></i><span><b>raised</b><code>#171314</code></span></div>
+    <div class="chip"><i style="background:#0b090a"></i><span><b>deep</b><code>#0b090a</code></span></div>
+    <div class="chip"><i style="background:#2c2426"></i><span><b>line</b><code>#2c2426</code></span></div>
+    <div class="chip"><i style="background:#544a46"></i><span><b>ink</b><code>#544a46</code></span></div>
+    <div class="chip"><i style="background:#928678"></i><span><b>stone</b><code>#928678</code></span></div>
+    <div class="chip"><i style="background:#cbbfa9"></i><span><b>soft</b><code>#cbbfa9</code></span></div>
+    <div class="chip"><i style="background:#e8dcc6"></i><span><b>paper</b><code>#e8dcc6</code></span></div>
+    <div class="chip"><i style="background:#f7efe2"></i><span><b>bright</b><code>#f7efe2</code></span></div>
+    <div class="chip"><i style="background:#3a1830"></i><span><b>selection</b><code>#3a1830</code></span></div>
+    <div class="chip neon" style="--c:rgba(255,46,196,.5)"><i style="background:#ff2ec4"></i><span><b>magenta</b><code>#ff2ec4</code></span></div>
+    <div class="chip neon" style="--c:rgba(196,110,255,.5)"><i style="background:#c46eff"></i><span><b>violet</b><code>#c46eff</code></span></div>
+    <div class="chip neon" style="--c:rgba(0,255,204,.45)"><i style="background:#00ffcc"></i><span><b>teal</b><code>#00ffcc</code></span></div>
+    <div class="chip neon" style="--c:rgba(0,234,255,.45)"><i style="background:#00eaff"></i><span><b>cyan</b><code>#00eaff</code></span></div>
+    <div class="chip neon" style="--c:rgba(64,156,255,.5)"><i style="background:#409cff"></i><span><b>blue</b><code>#409cff</code></span></div>
+    <div class="chip neon" style="--c:rgba(64,255,170,.45)"><i style="background:#40ffaa"></i><span><b>mint</b><code>#40ffaa</code></span></div>
+    <div class="chip neon" style="--c:rgba(255,190,40,.45)"><i style="background:#ffbe28"></i><span><b>amber</b><code>#ffbe28</code></span></div>
+    <div class="chip neon" style="--c:rgba(255,56,100,.5)"><i style="background:#ff3864"></i><span><b>red</b><code>#ff3864</code></span></div>
+  </section>
+
+  <p class="foot">Neon is reserved for what is live or interactive. Everything static is warm ink and rice paper.</p>
+</div>
+</body>
+</html>
