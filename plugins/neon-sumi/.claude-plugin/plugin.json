@@ -1,7 +1,14 @@
 {
   "name": "neon-sumi",
+  "displayName": "Neon Sumi",
   "version": "1.0.0",
   "description": "A status line and cockpit for Claude Code: context, 5h and weekly bars, PR / ticket / issue rows with titles, worktrees, ports that serve a page. Neon tubes on an ink-wash scroll.",
+  "author": {
+    "name": "Danneftw1",
+    "url": "https://github.com/Danneftw1"
+  },
+  "homepage": "https://danneftw1.github.io/nami-sumi-cc-statusline/",
+  "repository": "https://github.com/Danneftw1/nami-sumi-cc-statusline",
   "license": "MIT",
   "keywords": [
     "statusline",
@@ -10,8 +17,5 @@
     "cockpit",
     "ghostty",
     "iterm2"
-  ],
-  "author": {
-    "name": "Danneftw1"
-  }
+  ]
 }
