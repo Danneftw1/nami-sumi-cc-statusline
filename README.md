@@ -9,7 +9,7 @@ Free and open source (MIT). Python standard library only. Three commands to inst
 
 ![Neon Sumi in Ghostty, with the shader on](docs/neon-sumi.png)
 
-**[See it running live →](https://danneftw1.github.io/neon-sumi/)** The real shader over the real status line, in
+**[See it running live →](https://danneftw1.github.io/nami-sumi-cc-statusline/)** The real shader over the real status line, in
 your browser, with a toggle for terminals without shaders. The repo, tickets and ports in it are made up.
 
 ## Why you might want it
@@ -29,7 +29,7 @@ your browser, with a toggle for terminals without shaders. The repo, tickets and
 In Claude Code:
 
 ```
-/plugin marketplace add Danneftw1/neon-sumi
+/plugin marketplace add Danneftw1/nami-sumi-cc-statusline
 /plugin install neon-sumi@neon-sumi
 /neon-sumi:install
 ```
