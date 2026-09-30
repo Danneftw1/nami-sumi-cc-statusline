@@ -24,6 +24,9 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 SL = os.path.join(REPO, "plugins", "neon-sumi", "statusline")
+SLUG = "Danneftw1/nami-sumi-cc-statusline"
+REPO_URL = "https://github.com/" + SLUG
+SITE_URL = "https://danneftw1.github.io/nami-sumi-cc-statusline/"
 RE_TOKEN = re.compile(r"\x1b\[([0-9;:]*)m|\x1b\]8;;(.*?)\x1b\\")
 sys.path.insert(0, HERE)
 import fixtures  # noqa: E402
@@ -116,6 +119,7 @@ def main():
     data = {"tubes": prompt_rows(min(width, 110)) + tubes, "classic": prompt_rows(min(width, 110)) + classic}
     shader = open(os.path.join(SL, "ghostty", "neon-sumi.glsl"), encoding="utf-8").read()
     page = TEMPLATE.replace("__ROWS__", json.dumps(data, ensure_ascii=False)).replace("__SHADER__", shader)
+    page = page.replace("__SITE__", SITE_URL).replace("__REPO__", REPO_URL).replace("__SLUG__", SLUG)
     chars = set(re.sub(r"<[^>]+>", "", page)) | set(chr(c) for c in range(32, 127))
     for rows in data.values():
         for r in rows:
@@ -135,7 +139,14 @@ TEMPLATE = r"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Neon Sumi</title>
-<meta name="description" content="A status line for Claude Code. Neon tubes on an ink-wash scroll.">
+<meta name="description" content="A status line for Claude Code that tells you where you stand: context, limits, the PR, the ports that are up. Free and open source.">
+<link rel="canonical" href="__SITE__">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Neon Sumi, a status line for Claude Code">
+<meta property="og:description" content="Context, limits, the PR, the ports that are up. One glance below the prompt. Free and open source.">
+<meta property="og:url" content="__SITE__">
+<meta property="og:image" content="__SITE__neon-sumi.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
@@ -170,12 +181,31 @@ h1 em { font-style: normal; color: var(--magenta); text-shadow: 0 0 22px rgba(25
 .canvasbox { overflow-x: auto; }
 canvas { display: block; width: 100%; min-width: 760px; height: auto; }
 .status { padding: 8px 14px; font-family: var(--mono); font-size: 12px; color: var(--stone); border-top: 1px solid var(--line); }
-.install { display: grid; gap: 10px; max-width: 760px; }
-.install h2 { font-size: 15px; margin: 0; font-weight: 500; color: var(--soft); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0; padding: 0; list-style: none; font-family: var(--mono); font-size: 12px; }
+.facts li { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--soft); }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 6px; }
+.btn { font-family: var(--mono); font-size: 13px; text-decoration: none; border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); color: var(--paper); }
+.btn.primary { color: var(--sumi); background: var(--magenta); border-color: var(--magenta); box-shadow: 0 0 18px rgba(255,46,196,.45); }
+.btn:hover { border-color: var(--stone); } .btn.primary:hover { box-shadow: 0 0 26px rgba(255,46,196,.7); }
+section { display: grid; gap: 14px; }
+h2 { font-size: clamp(22px, 3vw, 28px); line-height: 1.2; margin: 0; font-weight: 700; }
+h3 { font-size: 16px; margin: 0; font-weight: 700; color: var(--paper); }
+.sub { margin: 0; color: var(--stone); max-width: 64ch; }
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.card { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: #120f10; display: grid; gap: 6px; align-content: start; }
+.card p { margin: 0; color: var(--soft); font-size: 15px; }
+.card .k { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); }
+code { font-family: var(--mono); font-size: .9em; color: var(--paper); }
+.install { max-width: 760px; }
+.cmd { position: relative; }
+.copy { position: absolute; top: 8px; right: 8px; font-family: var(--mono); font-size: 12px; color: var(--stone); background: #120f10;
+  border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+.copy:hover { color: var(--paper); } .copy:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
 pre { margin: 0; font-family: var(--mono); font-size: 13.5px; line-height: 1.6; background: #0b090a; border: 1px solid var(--line);
   border-radius: 8px; padding: 12px 14px; overflow: auto; color: var(--paper); }
 pre .c { color: var(--ink); }
-footer { font-family: var(--mono); font-size: 12px; color: var(--stone); letter-spacing: .03em; }
+.small { font-size: 14px; color: var(--stone); margin: 0; }
+footer { font-family: var(--mono); font-size: 12px; color: var(--stone); letter-spacing: .03em; border-top: 1px solid var(--line); padding-top: 18px; }
 footer a { color: var(--stone); text-decoration-color: rgba(255,46,196,.6); text-underline-offset: 3px; }
 a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
 </style>
@@ -185,7 +215,9 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
 <header>
   <div class="eyebrow">A status line for Claude Code</div>
   <h1>Neon Sumi, <em>lit</em></h1>
-  <p class="lede">Neon tubes on an ink-wash scroll. <b>This is live:</b> the real shader, running in your browser over the real status line.</p>
+  <p class="lede">Context left, the 5-hour and weekly limits, the branch and its PR, the dev server that is actually up. <b>One glance below the prompt,</b> so you don't have to ask.</p>
+  <ul class="facts"><li>free · MIT</li><li>Python standard library only</li><li>~25 ms per render</li><li>no telemetry</li></ul>
+  <div class="cta"><a class="btn primary" href="#install">Install in three commands</a><a class="btn" href="__REPO__">Source on GitHub</a></div>
 </header>
 
 <div class="stage" id="stage">
@@ -197,17 +229,58 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
   <div class="status" id="st">loading…</div>
 </div>
 
-<section class="install">
-  <h2>Install, from inside Claude Code</h2>
-<pre><span class="c"># add the marketplace, install, then let the skill wire it up</span>
-/plugin marketplace add Danneftw1/neon-sumi
-/plugin install neon-sumi@neon-sumi
-/neon-sumi:install</pre>
+<p class="small">Above: the real status line, rendered from a made-up repo, with the real Ghostty shader running over it in your browser. The repo, tickets and ports are invented.</p>
+
+<section>
+  <h2>Why you might want it</h2>
+  <div class="grid">
+    <div class="card"><h3>You stop asking</h3><p>How much context is left, whether CI passed, which port the app is on. The answers are already on screen, refreshed every second.</p></div>
+    <div class="card"><h3>It stays out of the way</h3><p>One Python process per render, about 25 ms. Nothing on the render path touches the network: GitHub and ports are collected in the background and shared by every open session.</p></div>
+    <div class="card"><h3>Colour means something</h3><p>Neon only for what is live: fills, percentages, state, links. Everything static is ink and paper. Bars turn amber at 70 % and red at 85 %.</p></div>
+    <div class="card"><h3>Nothing to take on trust</h3><p>No pip install, no account, no telemetry. It talks to your own <code>localhost</code> and, through your own <code>gh</code>, to GitHub. About 2,000 lines you can read in an afternoon.</p></div>
+  </div>
 </section>
 
-<footer>MIT · <a href="https://github.com/Danneftw1/neon-sumi">github.com/Danneftw1/neon-sumi</a> · typeset in Maple Mono (SIL OFL 1.1) · the repo, tickets and ports above are made up</footer>
+<section>
+  <h2>What it shows</h2>
+  <div class="grid">
+    <div class="card"><span class="k">Claude</span><p>Model, effort, advisor, session cost. Context, 5-hour and weekly usage as three bars. Links and readable files from the conversation, as clickable chips.</p></div>
+    <div class="card"><span class="k">GitHub</span><p>Branch, ahead/behind, the uncommitted diff, your worktrees. The branch's PR with CI and review state, then every PR, ticket and issue mentioned in the chat, with its title and state.</p></div>
+    <div class="card"><span class="k">Machine</span><p>Local ports that actually serve a page, as links. Ports that only answer with an error are counted, not linked.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Also in the box</h2>
+  <div class="grid">
+    <div class="card"><h3>The cockpit</h3><p>Everything that is the same in every session, in a narrow split pane: all your open PRs, the GitHub inbox, every port by owner, your boards. Each block says how old its data is.</p></div>
+    <div class="card"><h3>Ghostty edition</h3><p>Bars drawn as tubes, a sparkline of the last hour, and where you will land at reset at the current pace. Plus the shader you see above. Every other terminal gets the classic edition.</p></div>
+    <div class="card"><h3>Obsidian theme</h3><p>A matching theme and a Terminal plugin profile, so a terminal inside Obsidian gets the same colours.</p></div>
+  </div>
+</section>
+
+<section class="install" id="install">
+  <h2>Install, from inside Claude Code</h2>
+  <div class="cmd">
+<pre id="cmds"><span class="c"># add the marketplace, install, then let the skill wire it up</span>
+/plugin marketplace add __SLUG__
+/plugin install neon-sumi@neon-sumi
+/neon-sumi:install</pre>
+    <button type="button" class="copy" id="copy" aria-label="Copy the install commands">copy</button>
+  </div>
+  <p class="small">The last step copies the files to <code>~/.claude/neon-sumi/</code>, renders once so you can see it works, and asks before it touches <code>settings.json</code>. It keeps a backup. Needs Python 3.9+, a Nerd Font and <code>git</code>; <code>gh</code> is optional and lights up the GitHub rows.</p>
+</section>
+
+<footer>MIT · <a href="__REPO__">source, issues and docs on GitHub</a> · typeset in Maple Mono (SIL OFL 1.1) · icons from Nerd Fonts</footer>
 </div>
 
+<script>
+document.getElementById("copy").addEventListener("click", function () {
+  const b = this, text = document.getElementById("cmds").textContent.split("\n").filter(l => l.startsWith("/")).join("\n");
+  navigator.clipboard.writeText(text).then(() => { b.textContent = "copied"; setTimeout(() => { b.textContent = "copy"; }, 1600); },
+    () => { b.textContent = "select and copy"; });
+});
+</script>
 <script id="shader-body" type="x-shader/x-fragment">__SHADER__</script>
 <script>
 (function () {
