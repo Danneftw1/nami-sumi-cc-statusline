@@ -10,6 +10,8 @@
   "homepage": "https://danneftw1.github.io/nami-sumi-cc-statusline/",
   "repository": "https://github.com/Danneftw1/nami-sumi-cc-statusline",
   "license": "MIT",
+  "icon": "./icon.svg",
+  "privacyPolicyUrl": "https://github.com/Danneftw1/nami-sumi-cc-statusline/blob/main/plugins/neon-sumi/README.md#privacy-what-it-reads-and-where-it-connects",
   "keywords": [
     "statusline",
     "status line",
