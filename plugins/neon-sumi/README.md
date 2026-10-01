@@ -30,7 +30,7 @@ Plugins cannot set the status line, so `/neon-sumi:install` does it for you, in 
 
 To undo it, restore that backup (or remove the two keys) and delete `~/.claude/neon-sumi/` and `~/.cache/neon-sumi/`.
 
-## What it reads and where it connects
+## Privacy: what it reads and where it connects
 
 - **Your session, locally.** The status line payload from Claude Code, and the session transcript to find the links,
   files and `#123` references mentioned in the conversation. Only those issue and PR numbers are looked up, on
@@ -41,6 +41,6 @@ To undo it, restore that backup (or remove the two keys) and delete `~/.claude/n
 - **Your own machine's ports.** `lsof` or `ss`, and `docker ps` if Docker is installed, to list listening ports; then a
   plain HTTP request to `127.0.0.1` to see which of them serve a page.
 
-No telemetry, no analytics, no other network access.
+No telemetry, no analytics, no other network access. Nothing is sent to the author of Neon Sumi or to any server they run.
 
 Source, full documentation and issues: https://github.com/Danneftw1/nami-sumi-cc-statusline
