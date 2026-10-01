@@ -1,0 +1,28 @@
+{
+  "$help": "Windows Terminal fragment: the Neon Sumi colour scheme, the Ghostty palette one to one. Install as %LOCALAPPDATA%\\Microsoft\\Windows Terminal\\Fragments\\neon-sumi\\neon-sumi.json and set \"colorScheme\": \"Neon Sumi\" on a profile.",
+  "schemes": [
+    {
+      "name": "Neon Sumi",
+      "background": "#0F0C0D",
+      "foreground": "#E8DCC6",
+      "cursorColor": "#FF2EC4",
+      "selectionBackground": "#3A1830",
+      "black": "#1A1516",
+      "red": "#FF3864",
+      "green": "#40FFAA",
+      "yellow": "#FFBE28",
+      "blue": "#409CFF",
+      "purple": "#FF2EC4",
+      "cyan": "#00EAFF",
+      "white": "#E8DCC6",
+      "brightBlack": "#544A46",
+      "brightRed": "#FF6A8A",
+      "brightGreen": "#7DFFC4",
+      "brightYellow": "#FFD76E",
+      "brightBlue": "#7AB8FF",
+      "brightPurple": "#C46EFF",
+      "brightCyan": "#00FFCC",
+      "brightWhite": "#F7EFE2"
+    }
+  ]
+}

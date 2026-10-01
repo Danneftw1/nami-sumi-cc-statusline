@@ -95,7 +95,25 @@ config-file = ~/.claude/neon-sumi/ghostty/neon-sumi.ghostty
 The shader lights the whole terminal, not only the status line. `custom-shader-animation = false` in that file keeps
 the glow and stops the motion.
 
-Every other terminal (iTerm2, Terminal, Windows Terminal) gets the classic edition: the same rows, no shader.
+Every other terminal (iTerm2, Terminal) gets the classic edition: the same rows, no shader.
+
+## Windows Terminal edition (WSL)
+
+Windows Terminal 1.22 and later draw box-drawing glyphs themselves, so the tubes edition works there too. Set
+`"edition": "tubes"` in `~/.claude/neon-sumi/config.json`; auto-detection only recognises Ghostty.
+
+`windows-terminal/` carries the rest of the Ghostty edition:
+
+- `neon-sumi.json` is a Windows Terminal fragment with the Neon Sumi colour scheme. Copy it to
+  `%LOCALAPPDATA%\Microsoft\Windows Terminal\Fragments\neon-sumi\` and set `"colorScheme": "Neon Sumi"` on the profile.
+- `neon-sumi.hlsl` is the glow shader ported to HLSL: bloom, current, grain and vignette. Windows Terminal gives a
+  shader no cursor position, so the cursor comet is left out. Copy it next to Windows Terminal's `settings.json` and
+  set `"experimental.pixelShaderPath"` on the profile to its full Windows path. The `toggleShaderEffects` action
+  turns it off and on.
+- The profile needs a Nerd Font, for example `"font": {"face": "Cascadia Code NF"}`.
+
+Links work across the WSL boundary: files under `/mnt/c` open as Windows paths, everything else as
+`\\wsl.localhost\<distro>\...`, and WSL's localhost forwarding makes port links open in the Windows browser.
 
 ## Obsidian
 

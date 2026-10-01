@@ -376,7 +376,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
       edition = lit_ ? "tubes" : "classic"; shaderOn = lit_;
       document.getElementById("b-lit").setAttribute("aria-pressed", lit_);
       document.getElementById("b-flat").setAttribute("aria-pressed", !lit_);
-      document.getElementById("cap").textContent = lit_ ? "ghostty · neon-sumi.glsl · live" : "iTerm2, Terminal, Windows Terminal · no shader";
+      document.getElementById("cap").textContent = lit_ ? "ghostty · neon-sumi.glsl · live" : "iTerm2, Terminal · no shader";
       draw(); r.upload(); r.frame(performance.now() / 1000);
     }
     document.getElementById("b-lit").addEventListener("click", () => pick(true));
