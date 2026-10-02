@@ -70,7 +70,7 @@ linked.
 ## The cockpit
 
 Everything that is the same in every session lives in a separate view for a narrow split pane: all your open PRs, the
-GitHub inbox, every port grouped by owner, your boards. Every block says how old its data is.
+GitHub inbox, every port grouped by owner, your boards and the Claude Code hotkeys you want in view. Every block says how old its data is.
 
 ```
 python3 -B ~/.claude/neon-sumi/cockpit.py
@@ -113,6 +113,7 @@ Everything works without a config file. To add links, copy `config.example.json`
 | `edition` | `auto` (default), `classic` or `tubes` |
 | `repos` | extra links per `owner/name` for the online row: board, Vercel, v0, anything |
 | `boards`, `services`, `resources` | links in the cockpit |
+| `keys` | `{key, what}` pairs for the cockpit's hotkey block; list the ones you keep forgetting |
 | `guide_url` | adds a guide chip to the first row |
 | `vaults` | Obsidian vaults: `.md` files inside open in Obsidian instead of as files |
 

@@ -26,5 +26,22 @@
     {"label": "status line docs", "url": "https://code.claude.com/docs/en/statusline"},
     {"label": "OTel monitoring", "url": "https://code.claude.com/docs/en/monitoring-usage"},
     {"label": "CC changelog", "url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md"}
+  ],
+  "keys": [
+    {"key": "esc esc", "what": "rewind"},
+    {"key": "ctrl+s", "what": "stash prompt"},
+    {"key": "ctrl+b", "what": "background task"},
+    {"key": "ctrl+x enter", "what": "queue msg"},
+    {"key": "ctrl+x ctrl+s", "what": "send queued now"},
+    {"key": "ctrl+r", "what": "history \u00b7 ctrl+s scope"},
+    {"key": "ctrl+o", "what": "transcript \u00b7 [ v { }"},
+    {"key": "ctrl+_", "what": "undo edit"},
+    {"key": "ctrl+w ctrl+y alt+y", "what": "kill \u00b7 yank \u00b7 ring"},
+    {"key": "alt+p", "what": "model"},
+    {"key": "alt+t", "what": "thinking"},
+    {"key": "alt+o", "what": "fast"},
+    {"key": "alt+v", "what": "image (WSL)"},
+    {"key": "ctrl+z", "what": "suspend"},
+    {"key": "?", "what": "all keys"}
   ]
 }
