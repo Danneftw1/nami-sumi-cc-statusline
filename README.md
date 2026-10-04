@@ -5,7 +5,8 @@
 Context left, the 5-hour and weekly limits, the branch and its PR, the tickets you mentioned, the dev server that is
 actually up. One glance below the prompt, drawn as neon tubes on an ink-wash scroll.
 
-Free and open source (MIT). Python standard library only. Three commands to install.
+Free and open source (MIT). Python standard library only, plus one TypeScript module that Claude Code itself runs
+for the cockpit pane. Three commands to install.
 
 ![Neon Sumi in Ghostty, with the shader on](docs/neon-sumi.png)
 
@@ -16,13 +17,14 @@ your browser, with a toggle for terminals without shaders. The repo, tickets and
 
 - **You stop asking.** How much context is left, whether CI passed, which port the app is on: the answers are already
   on screen, refreshed every second.
-- **It stays out of the way.** About 25 ms per render, one Python process, and nothing on the render path touches the
+- **It stays out of the way.** About 30 ms per render on a current Python (about 150 ms on the Python 3.9 macOS
+  ships, which the install skill steers you off), one Python process, and nothing on the render path touches the
   network. GitHub and ports are collected in the background and share one cache across every open session.
 - **Colour means something.** Neon is reserved for what is live: bar fills, percentages, state, links. Everything
   static is warm ink and paper. Bars turn amber at 70 % and red at 85 %, so the only thing that stands out is the
   thing that needs you.
 - **Nothing to take on trust.** No pip install, no account, no telemetry. It talks to your own `localhost` and, through
-  your own `gh`, to GitHub. About 2,000 lines of Python you can read in an afternoon.
+  your own `gh`, to GitHub. About 2,500 lines of Python and 180 of TypeScript you can read in an afternoon.
 
 ## Install
 
@@ -83,9 +85,11 @@ boards. Every block says how old its data is.
 /neon-sumi-cockpit
 ```
 
-opens it as a pane inside Claude Code, beside the transcript, redrawn every two seconds at the pane's width. Close it
-with the pane's close mark or `ctrl+x x`. It needs Claude Code 2.1.286 or newer, where a plugin may draw a pane; the
-command appears once the plugin is installed, no install step.
+opens it as a pane inside Claude Code, redrawn every two seconds at the pane's width: beside the transcript in the
+fullscreen layout from 110 columns, above the prompt otherwise. Close it with the pane's close mark or `ctrl+x x`. It
+needs Claude Code 2.1.286 or newer, where a plugin may draw a pane, and `python3` on your PATH. The command is there as
+soon as the plugin is enabled, and the pane takes its 5-hour and weekly bars from the session itself, so it needs no
+install step.
 
 The same view runs in any terminal split, for older Claude Code or a tmux pane of its own:
 

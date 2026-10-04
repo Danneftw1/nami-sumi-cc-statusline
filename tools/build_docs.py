@@ -251,7 +251,7 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
   <div class="eyebrow">A status line for Claude Code</div>
   <h1>Neon Sumi, <em>lit</em></h1>
   <p class="lede">Context left, the 5-hour and weekly limits, the branch and its PR, the dev server that is actually up. <b>One glance below the prompt,</b> so you don't have to ask.</p>
-  <ul class="facts"><li>free · MIT</li><li>Python standard library only</li><li>~25 ms per render</li><li>no network on the render path</li><li>no telemetry</li><li>fits any width</li></ul>
+  <ul class="facts"><li>free · MIT</li><li>Python standard library, one TypeScript module</li><li>~30 ms per render on Python 3.11+</li><li>no network on the render path</li><li>no telemetry</li><li>fits any width</li></ul>
   <div class="cmd" id="install">
 <pre id="cmds"><span class="c"># in Claude Code: add the marketplace, install, let the skill wire it up</span>
 /plugin marketplace add __SLUG__
@@ -259,7 +259,7 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
 /neon-sumi:install</pre>
     <button type="button" class="copy" id="copy" aria-label="Copy the install commands">copy</button>
   </div>
-  <p class="small">The last step copies the files to <code>~/.claude/neon-sumi/</code>, renders once, and asks before it touches <code>settings.json</code> (with a backup). Needs Python 3.9+, a Nerd Font and <code>git</code>; <code>gh</code> lights up the GitHub rows.</p>
+  <p class="small">The last step copies the files to <code>~/.claude/neon-sumi/</code>, renders once, and asks before it touches <code>settings.json</code> (with a backup). Needs Python 3.9+ as <code>python3</code> on your PATH, a Nerd Font and <code>git</code>; <code>gh</code> lights up the GitHub rows.</p>
   <div class="cta"><a class="btn" href="__REPO__">Source on GitHub</a></div>
 </header>
 

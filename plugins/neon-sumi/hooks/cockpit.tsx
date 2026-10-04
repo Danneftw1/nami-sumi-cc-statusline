@@ -31,6 +31,19 @@ function hex(r: number, g: number, b: number): string {
   return '#' + [r, g, b].map(n => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0')).join('')
 }
 
+/** The spelling a Link takes: https anywhere, http on localhost only, as `new URL(href).href`; else none. */
+function linkable(href: string | undefined): string | undefined {
+  if (!href) return undefined
+  try {
+    const u = new URL(href)
+    if (u.username || u.password) return undefined
+    if (u.protocol === 'https:' || (u.protocol === 'http:' && u.hostname === 'localhost')) return u.href
+  } catch {
+    return undefined
+  }
+  return undefined
+}
+
 /** cockpit.py's ANSI: truecolour foreground, bold, underline, OSC 8 links. */
 function spansFromAnsi(text: string): Span[][] {
   const rows: Span[][] = []
@@ -46,8 +59,10 @@ function spansFromAnsi(text: string): Span[][] {
       const span: Span = { t: chunk }
       if (colour) span.c = colour
       if (bold) span.b = true
-      if (underline) span.u = true
-      if (href && /^https?:\/\//.test(href)) span.href = href
+      const link = linkable(href)
+      // A target the pane cannot open (a folder, a SKILL.md) draws as plain text: no dead underline.
+      if (underline && (!href || link)) span.u = true
+      if (link) span.href = link
       spans.push(span)
     }
     RE_TOKEN.lastIndex = 0
@@ -103,7 +118,6 @@ export const register: Register = on => {
     const { Box, Text, Link } = $.ui.resolve(e)
     wantedColumns = Math.max(40, e.props.bodyColumns || DEFAULT_COLUMNS)
     const f = await read($, frame)
-    const room = Math.max(1, (e.viewport?.rows ?? 40) - 2)
     if (f.error) {
       return (
         <Box flexDirection="column">
@@ -115,7 +129,7 @@ export const register: Register = on => {
     if (!f.at) return <Text dimColor>drawing the cockpit…</Text>
     return (
       <Box flexDirection="column">
-        {f.rows.slice(0, room).map(row => (
+        {f.rows.map(row => (
           <Text wrap="truncate-end">
             {row.length === 0 ? ' ' : row.map(span => (
               span.href
@@ -141,10 +155,16 @@ async function refresh($: EngineInterface) {
   const columns = wantedColumns
   try {
     const script = `${$.plugin.root}/statusline/cockpit.py`
-    const ran = await $.process.run(['python3', '-B', script, '--once'], {
-      env: { COLUMNS: String(columns) },
-      timeoutMs: 15000,
-    })
+    // The session's own 5h and weekly figures, so the bars need no status line install.
+    const usage = await $.session.usage()
+    const limits: Record<string, { used_percentage: number; resets_at?: number }> = {}
+    for (const w of usage.rateLimits) {
+      const resets = w.resetsAt ? Date.parse(w.resetsAt) / 1000 : undefined
+      limits[w.kind] = { used_percentage: w.percentUsed, ...(resets ? { resets_at: resets } : {}) }
+    }
+    const env: Record<string, string> = { COLUMNS: String(columns) }
+    if (Object.keys(limits).length) env.NEON_SUMI_RATE_LIMITS = JSON.stringify({ rate_limits: limits, fetched_at: Date.now() / 1000 })
+    const ran = await $.process.run(['python3', '-B', script, '--once'], { env, timeoutMs: 15000 })
     if (ran.exitCode !== 0) {
       await update($, frame, f => ({ ...f, at: Date.now(), columns, error: ran.stderr.trim().split('\n').slice(-3).join('\n') || `exit ${ran.exitCode}` }))
       return
