@@ -42,7 +42,11 @@ import unicodedata
 ROOT = os.path.dirname(os.path.abspath(__file__))
 HOME = os.path.expanduser("~")
 CLAUDE_DIR = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(HOME, ".claude")
-CONFIG_FILE = os.environ.get("NEON_SUMI_CONFIG") or os.path.join(ROOT, "config.json")
+# One config for every copy: the plugin folder's own copy (the pane runs from there) and the
+# installed one both read ~/.claude/neon-sumi/config.json, unless a config.json sits beside the script.
+CONFIG_FILE = os.environ.get("NEON_SUMI_CONFIG") or next(
+    (p for p in (os.path.join(ROOT, "config.json"), os.path.join(CLAUDE_DIR, "neon-sumi", "config.json"))
+     if os.path.isfile(p)), os.path.join(ROOT, "config.json"))
 CACHE = os.environ.get("NEON_SUMI_CACHE") or os.path.join(HOME, ".cache", "neon-sumi")
 TMP = os.environ.get("NEON_SUMI_TMP") or os.path.join(os.environ.get("TMPDIR") or "/tmp", "neon-sumi")
 GH_POLLER = os.path.join(ROOT, "gh_poller.py")
@@ -963,7 +967,9 @@ def repo_row(facts):
         ab = ("↑%d" % facts["ahead"] if facts["ahead"] else "") + ("↓%d" % facts["behind"] if facts["behind"] else "")
         parts.append(seg + (" %s%s%s" % (AMB, ab, RST) if ab else ""))
     if facts["files"]:
-        seg = "%sΔ%df%s %s+%d%s/%s−%d%s" % (BLUE, facts["files"], RST, GRN, facts["ins"], RST, RED, facts["del"], RST)
+        # A zero count stays dim: red for "−0" is warm with nothing wrong.
+        seg = "%sΔ%df%s %s+%d%s/%s−%d%s" % (BLUE, facts["files"], RST, GRN if facts["ins"] else DIM, facts["ins"], RST,
+                                          RED if facts["del"] else DIM, facts["del"], RST)
         parts.append(seg + (" %s·%s%s" % (DIM, facts["area"], RST) if facts["area"] else ""))
     return labelled("repo", BLUE, SEP.join(parts), ICON["repo"])
 
@@ -1186,8 +1192,9 @@ def render(data, out=sys.stdout):
     text = safe(session_chat_text, data, size)
     if data.get("rate_limits"):
         safe(record_history, data)
-        if read_json(RATE_LIMITS_FILE).get("rate_limits") != data["rate_limits"]:
-            write_json(RATE_LIMITS_FILE, {"rate_limits": data["rate_limits"]})   # the cockpit's 5h / wk
+        kept = read_json(RATE_LIMITS_FILE)   # the cockpit's 5h / wk, with its age
+        if kept.get("rate_limits") != data["rate_limits"] or NOW - (kept.get("fetched_at") or 0) > 60:
+            write_json(RATE_LIMITS_FILE, {"rate_limits": data["rate_limits"], "fetched_at": NOW})
     facts = safe(git_facts, cwd, data) or None
     rows = []
     rows += safe(claude_section, data, tail, size, text) or []

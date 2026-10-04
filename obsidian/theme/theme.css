@@ -177,18 +177,18 @@ body {
   --inline-title-color: var(--ns-bright);
   --inline-title-weight: 700;
 
-  /* Headings: a cool sweep of neon, magenta at the top */
+  /* Headings: neon for the two that matter, paper below so H3+ never read as links */
   --heading-formatting: var(--ns-ink);
   --h1-color: var(--ns-magenta);
   --h2-color: var(--ns-violet);
-  --h3-color: var(--ns-blue);
-  --h4-color: var(--ns-cyan);
-  --h5-color: var(--ns-teal);
-  --h6-color: var(--ns-mint);
+  --h3-color: var(--ns-bright);
+  --h4-color: var(--ns-paper);
+  --h5-color: var(--ns-soft);
+  --h6-color: var(--ns-soft);
   --h1-weight: 700;
   --h2-weight: 700;
-  --h3-weight: 500;
-  --h4-weight: 500;
+  --h3-weight: 600;
+  --h4-weight: 600;
   --h5-weight: 500;
   --h6-weight: 500;
 

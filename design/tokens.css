@@ -68,10 +68,10 @@
 
   --ns-heading-h1: var(--ns-magenta);
   --ns-heading-h2: var(--ns-violet);
-  --ns-heading-h3: var(--ns-blue);
-  --ns-heading-h4: var(--ns-cyan);
-  --ns-heading-h5: var(--ns-teal);
-  --ns-heading-h6: var(--ns-mint);
+  --ns-heading-h3: var(--ns-bright);
+  --ns-heading-h4: var(--ns-paper);
+  --ns-heading-h5: var(--ns-soft);
+  --ns-heading-h6: var(--ns-soft);
 
   --ns-syntax-text: var(--ns-soft);
   --ns-syntax-comment: var(--ns-stone);

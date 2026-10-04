@@ -1,5 +1,5 @@
 {
-  "_about": "Copy to config.json next to statusline.py. Every key is optional.",
+  "_about": "Copy to ~/.claude/neon-sumi/config.json. Every key is optional; the status line, the terminal cockpit and the /neon-sumi-cockpit pane read the same file.",
   "edition": "auto",
   "layout": "full",
   "guide_url": "",
