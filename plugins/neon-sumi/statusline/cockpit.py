@@ -58,7 +58,7 @@ def head(icon, text, colour, note="", fetched=None):
     age = ""
     if fetched:
         secs = time.time() - fetched
-        age = ("%s · %s ago%s" % (sl.INK, sl.fmt_age(secs), RST)) if secs <= 90 else \
+        age = ("%s · %s ago%s" % (D, sl.fmt_age(secs), RST)) if secs <= 90 else \
               ("%s · stale %s%s" % (sl.AMB, sl.fmt_age(secs), RST))
     return "%s%s %s%s%s%s  %s%s%s%s" % (colour, icon, sl.BOLD, sl.PAPER, text, RST, D, note, RST, age)
 
@@ -156,7 +156,7 @@ def work_rows(width):
 def inbox_rows(width):
     notif = keep_fresh("notifications.json", NOTIF_TTL, "notifications")
     n = notif.get("count") or 0
-    rows = [head(sl.ICON["bell"], "inbox", sl.AMB, ("%d unread" % n) if n else "nothing unread", notif.get("fetched_at"))]
+    rows = [head(sl.ICON["bell"], "inbox", sl.BLUE, ("%d unread" % n) if n else "nothing unread", notif.get("fetched_at"))]
     for it in (notif.get("items") or [])[:3]:
         txt = sl.cut("%s %s" % ((it.get("repo") or "").split("/")[-1], it.get("title") or ""), width - 4)
         rows.append("  " + sl.osc8(it.get("url") or "https://github.com/notifications", sl.PAPER + txt + RST))
@@ -218,7 +218,7 @@ def link_rows(width):
     cfg = sl.read_json(sl.CONFIG_FILE)
     rows = []
     boards = [b for owner in (cfg.get("boards") or {}).values() for b in owner]
-    rows.append(head(sl.ICON["board"], "boards", sl.AMB, "" if boards else "none in config.json"))
+    rows.append(head(sl.ICON["board"], "boards", sl.BLUE, "" if boards else "none in config.json"))
     rows += chip_rows([sl.osc8(b.get("url"), "%s%s%s" % (sl.PAPER, sl.cut(b.get("label") or "", 22), RST) +
                                ("%s #%d%s" % (sl.AMB, b["number"], RST) if b.get("number") else "")) for b in boards], width)
     rows.append("")
