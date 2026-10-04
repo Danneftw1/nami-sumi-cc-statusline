@@ -5,7 +5,7 @@ Builds, under <root>:
   home/code/tidepool            a real git repo (origin lanternworks/tidepool)
   home/code/tidepool/.claude/worktrees/tide-tables-3f9a21   a linked worktree on
                                 claude/42-tide-tables with uncommitted edits
-  home/.cache/neon-sumi/...     collector caches: refs, ports, work, inbox, history
+  home/.cache/neon-sumi/...     collector caches: refs, ports, work, inbox, history, skills
   tmp/                          per-repo caches (git facts, the branch's PR)
   transcript.jsonl              a short chat that mentions tickets, a PR, files
   config.json                   links for the repo, boards, services
@@ -100,6 +100,15 @@ def build(root):
                                                       "count": 2, "items": [
         {"title": "Review requested: Tide tables for the harbour page", "repo": SLUG, "url": "https://github.com/%s/pull/48" % SLUG},
         {"title": "CI passed on main", "repo": "lanternworks/lighthouse", "url": "https://github.com/lanternworks/lighthouse"}]})
+    skill_md = lambda plugin, name: os.path.join(root, "plugins", "cache", plugin, "skills", name, "SKILL.md")
+    installed = {"tidekit:" + n: skill_md("tidekit", n)
+                 for n in ("tide-tables", "harbour-map", "ferry-feed", "release-notes", "forecast-check")}
+    installed["commit"] = os.path.join(root, "skills", "commit", "SKILL.md")
+    write(os.path.join(cache, "skills.json"), {
+        "fetched_at": NOW - 12, "last_attempt": 4102444800, "window": 7 * 86400, "installed": installed,
+        "fired": {"tidekit:tide-tables": [6, NOW - 120], "commit": [4, NOW - 1200],
+                  "tidekit:harbour-map": [3, NOW - 3600], "tidekit:release-notes": [1, NOW - 2 * 86400]},
+        "refusals": [[NOW - 600, "tidepool#48 was opened in this session and is not merged."]]})
     samples, p = [], 34.0
     for m in range(60, -1, -1):
         if not 28 <= m <= 36:
