@@ -4,9 +4,10 @@
 The status line is per session and has a row budget. Everything that is the
 same in every session lives here instead: the skills Claude loaded this week
 and the ones that stayed silent, your open PRs everywhere, the GitHub inbox,
-every listening port grouped by who owns it, your boards, services and docs.
-Every block is always there (an empty one says so) and says how old its data
-is, so you can trust that nothing is missing.
+every listening port grouped by who owns it, your boards, services and docs,
+and the Claude Code hotkeys worth remembering. Every block is always there (an
+empty one says so) and says how old its data is, so you can trust that nothing
+is missing.
 
 Same caches and collectors as the status line; opening it keeps them fresh
 when no session is running.
@@ -232,6 +233,13 @@ def link_rows(width):
     return rows
 
 
+def key_rows(width):
+    keys = sl.read_json(sl.CONFIG_FILE).get("keys") or []
+    rows = [head(sl.ICON["guide"], "keys", sl.PINK, "" if keys else "none in config.json")]
+    rows += chip_rows(["%s%s%s %s%s%s" % (sl.AMB, k.get("key") or "", RST, D, k.get("what") or "", RST) for k in keys], width)
+    return rows
+
+
 def frame(width=None):
     width = max(40, width or shutil.get_terminal_size((56, 40)).columns)
     sl.NOW = time.time()
@@ -240,7 +248,7 @@ def frame(width=None):
     usage = sl.safe(sl.usage_rows, sl.read_json(sl.RATE_LIMITS_FILE))
     if usage:
         rows += usage.split("\n") + [""]
-    for block in (skill_rows, work_rows, inbox_rows, port_rows, link_rows):
+    for block in (skill_rows, key_rows, work_rows, inbox_rows, port_rows, link_rows):
         got = sl.safe(block, width)
         if got:
             rows += got + [""]
