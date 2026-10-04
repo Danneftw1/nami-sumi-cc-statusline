@@ -13,7 +13,7 @@
       "description": "Installs the Neon Sumi status line, subagent line and cockpit, with an optional Ghostty shader.",
       "category": "productivity",
       "tags": ["statusline", "theme", "github", "ghostty"],
-      "homepage": "https://danneftw1.github.io/nami-sumi-cc-statusline/"
+      "homepage": "https://danneftw1.github.io/neon-sumi/"
     }
   ]
 }

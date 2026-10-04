@@ -9,7 +9,7 @@ Free and open source (MIT). Python standard library only. Three commands to inst
 
 ![Neon Sumi in Ghostty, with the shader on](docs/neon-sumi.png)
 
-**[See it running live →](https://danneftw1.github.io/nami-sumi-cc-statusline/)** The real shader over the real status line, in
+**[See it running live →](https://danneftw1.github.io/neon-sumi/)** The real shader over the real status line, in
 your browser, with a toggle for terminals without shaders. The repo, tickets and ports in it are made up.
 
 ## Why you might want it
@@ -29,14 +29,15 @@ your browser, with a toggle for terminals without shaders. The repo, tickets and
 In Claude Code:
 
 ```
-/plugin marketplace add Danneftw1/nami-sumi-cc-statusline
+/plugin marketplace add Danneftw1/neon-sumi
 /plugin install neon-sumi@neon-sumi
 /neon-sumi:install
 ```
 
 The install skill copies the files to `~/.claude/neon-sumi/`, renders once so you can see it works, and asks before it
 changes `statusLine` and `subagentStatusLine` in `~/.claude/settings.json`. It keeps a backup of your settings.
-Plugins cannot set the status line themselves, which is why that last step exists.
+Plugins cannot set the status line themselves, which is why that last step exists. When the plugin updates, run
+`/neon-sumi:install` again: it copies the new files and keeps your `config.json`.
 
 **Needs**: Python 3.9+, a [Nerd Font](https://www.nerdfonts.com) in the terminal, `git`. Optional: an authenticated
 `gh` for the GitHub rows and the cockpit, `jq` for the subagent line, `docker` for container ports.
@@ -66,6 +67,10 @@ state. Then where the repo lives online: GitHub, plus any board, deploy or desig
 
 **Machine**: local ports that actually serve a page, as links. Ports that only answer with an error are counted, not
 linked.
+
+Every row fits the pane. Claude Code tells the status line how wide the terminal is, and a row that would wrap drops
+chips from the right at a chip boundary and ends in `…`. On a short terminal, `"layout": "compact"` puts links and
+files on one row and leaves out the online row.
 
 ## The cockpit
 
@@ -105,6 +110,20 @@ Obsidian gets the same colours. See [obsidian/README.md](obsidian/README.md).
 
 ![The Obsidian theme](docs/obsidian.png)
 
+## Matching themes
+
+The palette lives in one file, `design/tokens.json`, and `tools/build_themes.py` turns it into themes for the tools
+around the terminal:
+
+| Tool | File |
+| --- | --- |
+| Claude Code | `plugins/neon-sumi/themes/neon-sumi.json`, ships with the plugin: `/theme` → Neon Sumi |
+| Zed | `themes/zed/neon-sumi.json` |
+| iTerm2 | `themes/iterm2/Neon Sumi.itermcolors` |
+| Ghostty, Obsidian | `plugins/neon-sumi/statusline/ghostty/` and `obsidian/`, palettes kept in step with the tokens |
+
+[themes/README.md](themes/README.md) says how to load each one.
+
 ## Configure
 
 Everything works without a config file. To add links, copy `config.example.json` to `~/.claude/neon-sumi/config.json`:
@@ -112,11 +131,15 @@ Everything works without a config file. To add links, copy `config.example.json`
 | Key | What it does |
 | --- | --- |
 | `edition` | `auto` (default), `classic` or `tubes` |
+| `layout` | `full` (default) or `compact`: links and files share a row, no online row |
 | `repos` | extra links per `owner/name` for the online row: board, Vercel, v0, anything |
 | `boards`, `services`, `resources` | links in the cockpit |
 | `keys` | `{key, what}` pairs for the cockpit's hotkey block; list the ones you keep forgetting |
 | `guide_url` | adds a guide chip to the first row |
 | `vaults` | Obsidian vaults: `.md` files inside open in Obsidian instead of as files |
+| `cost_warn`, `cost_crit` | session cost in dollars where the cost chip turns amber and red (default 3 and 8) |
+| `width` | row width in columns, if the terminal reports it wrong |
+| `width_reserve` | columns kept free on the right (default 2, plus your `statusLine` padding) |
 
 ## Uninstall
 
@@ -130,6 +153,13 @@ renders the site, `docs/index.html`, from it:
 
 ```
 uv run --no-project --with fonttools --with brotli python tools/build_docs.py
+```
+
+The themes are generated too. Change a colour in `design/tokens.json`, then:
+
+```
+python3 tools/build_themes.py          # every port, from the tokens
+python3 tools/build_themes.py --check  # colours in the repo that are not tokens
 ```
 
 Issues and pull requests are welcome.
