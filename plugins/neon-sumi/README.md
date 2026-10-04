@@ -7,12 +7,12 @@ a split pane and an optional Ghostty shader that makes the neon glow.
 
 Free and open source under the MIT license. Python standard library only. Works in Claude Code (the CLI) only.
 
-See it running: https://danneftw1.github.io/nami-sumi-cc-statusline/
+See it running: https://danneftw1.github.io/neon-sumi/
 
 ## Install
 
 ```
-/plugin marketplace add Danneftw1/nami-sumi-cc-statusline
+/plugin marketplace add Danneftw1/neon-sumi
 /plugin install neon-sumi@neon-sumi
 /neon-sumi:install
 ```
@@ -30,6 +30,8 @@ Plugins cannot set the status line, so `/neon-sumi:install` does it for you, in 
 
 To undo it, restore that backup (or remove the two keys) and delete `~/.claude/neon-sumi/` and `~/.cache/neon-sumi/`.
 
+The plugin also adds a Neon Sumi colour theme for Claude Code itself. Nothing changes until you pick it in `/theme`.
+
 ## Privacy: what it reads and where it connects
 
 - **Your session, locally.** The status line payload from Claude Code, and the session transcript to find the links,
@@ -43,4 +45,4 @@ To undo it, restore that backup (or remove the two keys) and delete `~/.claude/n
 
 No telemetry, no analytics, no other network access. Nothing is sent to the author of Neon Sumi or to any server they run.
 
-Source, full documentation and issues: https://github.com/Danneftw1/nami-sumi-cc-statusline
+Source, full documentation and issues: https://github.com/Danneftw1/neon-sumi

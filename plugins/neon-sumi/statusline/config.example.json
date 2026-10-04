@@ -1,7 +1,10 @@
 {
   "_about": "Copy to config.json next to statusline.py. Every key is optional.",
   "edition": "auto",
+  "layout": "full",
   "guide_url": "",
+  "cost_warn": 3,
+  "cost_crit": 8,
   "vaults": [
     {"path": "~/notes", "name": "notes"}
   ],

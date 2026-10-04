@@ -23,6 +23,11 @@ EDITIONS: "classic" (any terminal) and "tubes" (Ghostty: heavy box-drawing
 tubes, a sparkline of the last hour and a pace projection on the 5h row).
 config.json "edition": "auto" picks tubes when TERM_PROGRAM is ghostty.
 
+WIDTH: no row is wider than the terminal. Claude Code sets COLUMNS; a row that
+would wrap loses chips from the right, at a chip boundary, and ends in "…".
+config.json "layout": "compact" folds links and files into one row and drops
+the online row, for short terminals.
+
 Every row fails open to "" -- one broken segment never blanks the line.
 """
 import hashlib
@@ -32,6 +37,7 @@ import re
 import subprocess
 import sys
 import time
+import unicodedata
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 HOME = os.path.expanduser("~")
@@ -76,7 +82,8 @@ def fg(r, g, b):
 
 PAPER = fg(232, 220, 198)     # labels: rice paper
 DIM = fg(146, 134, 120)       # secondary text: stone ink
-INK = fg(84, 74, 70)          # rules, separators, unlit cells: sumi
+INK = fg(84, 74, 70)          # rules, separators: sumi
+GLASS = fg(62, 52, 56)        # unlit tube glass
 SEP = INK + " │ " + RST
 DOT = INK + " · " + RST
 GRN = fg(64, 255, 170)        # neon mint
@@ -87,14 +94,15 @@ TEAL = fg(0, 255, 204)        # neon teal
 BLUE = fg(64, 156, 255)       # electric blue
 MAUVE = fg(196, 110, 255)     # neon violet
 PINK = fg(255, 46, 196)       # neon magenta
-UL_ON = "\033[4m\033[58;2;255;46;196m"   # link: underline, magenta where SGR 58 is supported
+UL_ON = "\033[4m\033[58;2;84;74;70m"     # link: a quiet ink underline where SGR 58 works; the chip's own colour leads
 UL_OFF = "\033[24m\033[59m"
 
-# Every bar keeps its own hue family until it is in trouble (70 % / 85 %).
+# Every bar keeps its own cool hue at rest. Warm means trouble: amber at 70 %,
+# red at 85 %, and nothing warm is drawn on a bar before that.
 IDENTITY = {"ctx": ((120, 60, 255), (236, 72, 255)),    # violet -> magenta
-            "5h": ((0, 170, 150), (0, 240, 255)),        # deep teal -> cyan
-            "wk": ((255, 130, 0), (255, 222, 70))}       # amber -> gold
-LABEL_COLOUR = {"5h": TEAL, "wk": AMB}
+            "5h": ((0, 170, 150), (0, 234, 255)),        # deep teal -> cyan
+            "wk": ((48, 96, 255), (122, 184, 255))}      # deep blue -> blue
+LABEL_COLOUR = {"5h": TEAL, "wk": BLUE}
 
 ICON = {
     "ctx": chr(0xF1C0), "5h": chr(0xF017), "wk": chr(0xF073), "link": chr(0xF0C1), "file": chr(0xF15B),
@@ -126,14 +134,14 @@ def severity(pct):
 
 def ramp_stops(sev, kind=None):
     if sev >= 2:
-        return (255, 40, 60), (255, 120, 0)
+        return (255, 56, 100), (255, 120, 0)
     if sev >= 1:
-        return (255, 100, 150), (255, 190, 0)
-    return IDENTITY.get(kind, ((255, 0, 255), (0, 255, 255)))
+        return (255, 100, 150), (255, 190, 40)
+    return IDENTITY.get(kind, ((255, 46, 196), (0, 234, 255)))
 
 
 def pct_colour(sev):
-    return fg(255, 60, 90) if sev >= 2 else fg(255, 190, 0) if sev >= 1 else fg(0, 255, 255)
+    return RED if sev >= 2 else AMB if sev >= 1 else CYN
 
 
 def read_json(path):
@@ -210,15 +218,15 @@ def cut(text, n):
 def bar_label(text, colour, bold=False, icon=""):
     """Icon + label padded to LABEL_WIDTH, so every row's body starts in the
     same column -- that is what makes the rows stack."""
-    return "%s%s%s %s%s%s" % (BOLD if bold else "", colour, icon or " ", PAPER,
-                              text[:LABEL_WIDTH].ljust(LABEL_WIDTH), RST)
+    return "%s%s%s  %s%s%s" % (BOLD if bold else "", colour, icon or " ", PAPER,
+                               text[:LABEL_WIDTH].ljust(LABEL_WIDTH), RST)
 
 
 def linked_label(url, text, colour, icon, bold=False):
     """A label that is also a link: the underline stops at the word, the
     padding after it stays plain."""
     text = text[:LABEL_WIDTH]
-    return osc8(url, "%s%s%s %s%s%s" % (BOLD if bold else "", colour, icon, PAPER, text, RST)) + \
+    return osc8(url, "%s%s%s  %s%s%s" % (BOLD if bold else "", colour, icon, PAPER, text, RST)) + \
         " " * (LABEL_WIDTH - len(text))
 
 
@@ -257,6 +265,86 @@ def edition():
     return "tubes" if e == "tubes" else "classic"
 
 
+def compact():
+    return str(CONFIG.get("layout") or "").lower() == "compact"
+
+
+# ── width: no row wider than the terminal ──────────────────────────────────────
+RE_ESC = re.compile(r"\x1b\[[0-9;:]*m|\x1b\]8;;[^\x1b]*\x1b\\")
+CUT_AT = (" │ ", " · ", "  ")   # chip boundaries, tried right to left
+CUT_MIN = 14                     # never cut inside the gutter, icon and label
+
+
+def cells(ch):
+    if unicodedata.combining(ch):
+        return 0
+    return 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+
+
+def visible(row):
+    return sum(cells(c) for c in RE_ESC.sub("", row))
+
+
+def statusline_padding():
+    sl = read_json(os.path.join(CLAUDE_DIR, "settings.json")).get("statusLine")
+    pad = sl.get("padding") if isinstance(sl, dict) else 0
+    return pad if isinstance(pad, int) and pad > 0 else 0
+
+
+def term_width():
+    """Usable columns, or 0 when unknown (then nothing is cut). Claude Code
+    sets COLUMNS for the command; the row loses its own padding and the two
+    columns of spacing the interface keeps. config.json "width" forces it."""
+    forced = CONFIG.get("width")
+    if isinstance(forced, int) and not isinstance(forced, bool) and forced > 0:
+        return forced
+    try:
+        cols = int(os.environ.get("COLUMNS") or 0)
+    except ValueError:
+        return 0
+    if cols <= 0:
+        return 0
+    reserve = CONFIG.get("width_reserve")
+    if not isinstance(reserve, int) or isinstance(reserve, bool) or reserve < 0:
+        reserve = 2 + statusline_padding()
+    return max(24, cols - reserve)
+
+
+def fit(row, width):
+    """A row that would wrap is cut at the last chip boundary that fits, or
+    mid-word if none does, and ends in an ink ellipsis. Escape sequences stay
+    whole and a link cut open is closed, so the terminal is left clean."""
+    if width <= 0 or visible(row) <= width:
+        return row
+    toks, pos = [], 0
+    for m in RE_ESC.finditer(row):
+        toks += [(c, False) for c in row[pos:m.start()]] + [(m.group(0), True)]
+        pos = m.end()
+    toks += [(c, False) for c in row[pos:]]
+    plain, at, col, cols_at = "", [], 0, []
+    for i, (t, esc) in enumerate(toks):
+        if not esc:
+            plain += t
+            at.append(i)
+            cols_at.append(col)
+            col += cells(t)
+    cut_p, mark = None, " …"
+    for p in range(len(plain) - 1, 0, -1):
+        if CUT_MIN <= cols_at[p] <= width - 2 and plain[p - 1] != " " and \
+                any(plain.startswith(sep, p) for sep in CUT_AT):
+            cut_p = p
+            break
+    if cut_p is None:                      # one chip is wider than the row: cut inside it
+        cut_p, mark = max(i for i in range(len(plain)) if cols_at[i] <= width - 1), "…"
+    out, link = [], False
+    for t, esc in toks[:at[cut_p]]:
+        out.append(t)
+        if esc and t.startswith("\x1b]8;;"):
+            link = t != "\x1b]8;;\x1b\\"
+    tail = (UL_OFF + "\x1b]8;;\x1b\\") if link else ""
+    return "".join(out) + RST + tail + INK + mark + RST
+
+
 # ── bars ───────────────────────────────────────────────────────────────────────
 def bar(pct, sev, width=BAR_WIDTH, kind=None):
     """Classic edition: a neon tube of ▰ cells, gradient fill, a white-hot
@@ -275,7 +363,7 @@ def bar(pct, sev, width=BAR_WIDTH, kind=None):
         elif i == filled and filled > 0:
             out.append(fg(r * 0.45, g * 0.45, b * 0.45) + "▰")
         else:
-            out.append(fg(58, 50, 54) + "▱")
+            out.append(GLASS + "▱")
     return "".join(out) + RST
 
 
@@ -296,7 +384,7 @@ def tube(pct, sev, width=BAR_WIDTH, kind=None):
         elif i == full and half:
             out.append(BOLD + fg(r, g, b) + "╸")
         else:
-            out.append(RST + fg(62, 52, 56) + "─")
+            out.append(RST + GLASS + "─")
     return "".join(out) + RST
 
 
@@ -305,11 +393,12 @@ def draw_bar(pct, sev, kind):
 
 
 # ── Claude section ─────────────────────────────────────────────────────────────
-MODEL_TIERS = [("fable", chr(0xF135), (203, 166, 247)), ("opus", chr(0xF005), (249, 226, 175)),
-               ("sonnet", chr(0xF013), (137, 180, 250)), ("haiku", chr(0xF06C), (166, 227, 161))]
-EFFORT_LEVELS = {"max": (chr(0xF06D), (243, 139, 168)), "xhigh": (chr(0xF0E7), (249, 226, 175)),
-                 "high": (chr(0xF0E7), (249, 226, 175)), "medium": (chr(0xF0E7), (148, 226, 213)),
-                 "low": (chr(0xF068), (99, 104, 128))}
+# One palette hue per chip, none of them warm: warm is kept for trouble.
+MODEL_TIERS = [("fable", chr(0xF135), (196, 110, 255)), ("opus", chr(0xF005), (255, 46, 196)),
+               ("sonnet", chr(0xF013), (64, 156, 255)), ("haiku", chr(0xF06C), (64, 255, 170))]
+EFFORT_LEVELS = {"max": (chr(0xF06D), (255, 46, 196)), "xhigh": (chr(0xF0E7), (196, 110, 255)),
+                 "high": (chr(0xF0E7), (0, 234, 255)), "medium": (chr(0xF0E7), (0, 255, 204)),
+                 "low": (chr(0xF068), (146, 134, 120))}
 
 
 def model_chip(data):
@@ -318,7 +407,7 @@ def model_chip(data):
     if not name:
         return ""
     name = re.sub(r"\s*\([^)]*context\)\s*$", "", name).strip()
-    icon, rgb = chr(0xF128), (166, 173, 200)
+    icon, rgb = chr(0xF128), (232, 220, 198)
     for key, k_icon, k_rgb in MODEL_TIERS:
         if key in name.lower():
             icon, rgb = k_icon, k_rgb
@@ -331,7 +420,7 @@ def effort_chip(data):
     level = str((data.get("effort") or {}).get("level") or "").lower().strip()
     if not level:
         return ""
-    icon, rgb = EFFORT_LEVELS.get(level, (chr(0xF0E7), (180, 190, 254)))
+    icon, rgb = EFFORT_LEVELS.get(level, (chr(0xF0E7), (232, 220, 198)))
     col = fg(*rgb)
     return "%s%s%s%s %s%s%s" % (BOLD, col, icon, RST, col, level, RST)
 
@@ -359,7 +448,7 @@ def advisor_chip(data, tail, size):
         if tier in adv.lower():
             label = tier
             break
-    col = {"fable": MAUVE, "opus": AMB, "sonnet": BLUE, "haiku": GRN}.get(label, fg(250, 179, 135))
+    col = {"fable": MAUVE, "opus": PINK, "sonnet": BLUE, "haiku": GRN}.get(label, PAPER)
     suffix = ""
     tp = data.get("transcript_path")
     if tp and size:
@@ -391,8 +480,9 @@ def cost_chip(data):
     c = (data.get("cost") or {}).get("total_cost_usd")
     if c is None:
         return ""
-    col = fg(255, 60, 90) if c >= 8 else fg(255, 190, 0) if c >= 3 else fg(57, 255, 20)
-    return "%s$%s%s%.2f%s" % (GRN, RST, col, c, RST)
+    warn, crit = CONFIG.get("cost_warn", 3), CONFIG.get("cost_crit", 8)
+    col = RED if c >= crit else AMB if c >= warn else GRN
+    return "%s$%.2f%s" % (col, c, RST)
 
 
 def guide_chip():
@@ -420,9 +510,12 @@ def context_gauge(data):
     pct = cw.get("used_percentage")
     if not isinstance(pct, (int, float)) or isinstance(pct, bool):
         pct = used / size * 100
-    sev = max(severity(pct), 2 if used >= 700_000 else 1 if used >= 400_000 else 0)
-    return "%s %s %s%3.0f%%%s  %s%s%s" % (bar_label("ctx", MAUVE, icon=ICON["ctx"]), draw_bar(pct, sev, "ctx"),
-                                          pct_colour(sev), pct, RST, fg(116, 199, 236), fmt_tokens(used), RST)
+    tok_sev = 2 if used >= 700_000 else 1 if used >= 400_000 else 0
+    sev = max(severity(pct), tok_sev)
+    why = " %s≥%dk%s" % (DIM, 700 if tok_sev >= 2 else 400, RST) if tok_sev > severity(pct) else ""
+    tok_col = (RED if tok_sev >= 2 else AMB) if tok_sev else DIM
+    return "%s %s %s%3.0f%%%s  %s%s%s%s" % (bar_label("ctx", MAUVE, icon=ICON["ctx"]), draw_bar(pct, sev, "ctx"),
+                                            pct_colour(sev), pct, RST, tok_col, fmt_tokens(used), RST, why)
 
 
 def usage_windows(data):
@@ -465,10 +558,10 @@ def sparkline(samples, n=12, bucket=300):
     out = []
     for i, v in enumerate(vals):
         if v is None:
-            out.append(fg(62, 52, 56) + "▁")
+            out.append(GLASS + "▁")
             continue
         t = i / (n - 1)
-        out.append(fg(0, lerp(150, 240, t), lerp(135, 255, t)) + SPARK[int(round((v - vmin) / span * 7))])
+        out.append(fg(0, lerp(150, 234, t), lerp(135, 255, t)) + SPARK[int(round((v - vmin) / span * 7))])
     return "".join(out) + RST
 
 
@@ -506,7 +599,7 @@ def usage_rows(data):
     if isinstance(spend, dict) and isinstance(spend.get("used_percentage"), (int, float)):
         u = float(spend["used_percentage"])
         sev = 2 if u >= 100 else severity(u)
-        rows.append("%s %s %s%3.0f%%%s" % (bar_label("spend", AMB, icon=chr(0xF09D)), draw_bar(u, sev, None),
+        rows.append("%s %s %s%3.0f%%%s" % (bar_label("spend", MAUVE, icon=chr(0xF09D)), draw_bar(u, sev, None),
                                           pct_colour(sev), u, RST))
     return "\n".join(rows)
 
@@ -654,28 +747,43 @@ def web_label(url):
     return cut(host + ("/" + seg if seg and len(seg) <= 14 else ""), 32)
 
 
-def web_row(text):
-    urls = extract_web(text)
-    chips = ["%s%s %s%s" % (DIM, ICON.get(host_kind(u), ICON["link"]), RST, osc8(u, CYN + web_label(u) + RST)) for u in urls]
-    return labelled("links", MAUVE, DOT.join(chips), ICON["link"]) if chips else ""
+def web_chips(text):
+    return ["%s%s %s%s" % (DIM, ICON.get(host_kind(u), ICON["link"]), RST, osc8(u, CYN + web_label(u) + RST))
+            for u in extract_web(text)]
 
 
-def files_row(text):
+def file_chips(text):
     if not pathlink:
-        return ""
+        return []
     chips = []
     for path, line in extract_paths(text):
         name = os.path.basename(path) + (":" + line if line else "")
         chips.append(osc8(pathlink.link_for(path), CYN + name + RST))
+    return chips
+
+
+def web_row(text):
+    chips = web_chips(text)
+    return labelled("links", MAUVE, DOT.join(chips), ICON["link"]) if chips else ""
+
+
+def files_row(text):
+    chips = file_chips(text)
     return labelled("files", MAUVE, DOT.join(chips), ICON["file"]) if chips else ""
 
 
+def chat_row(text):
+    """Compact layout: files and links share one row, files first."""
+    chips = (safe(file_chips, text) or [])[:3] + (safe(web_chips, text) or [])[:3]
+    return labelled("links", MAUVE, DOT.join(chips), ICON["link"]) if chips else ""
+
+
 def claude_section(data, tail, size, text):
-    head = SEP.join(s for s in (osc8(USAGE_URL, safe(model_chip, data)), safe(effort_chip, data),
-                                safe(advisor_chip, data, tail, size), osc8(USAGE_URL, safe(cost_chip, data)),
+    head = SEP.join(s for s in (safe(model_chip, data), safe(effort_chip, data),
+                                safe(advisor_chip, data, tail, size), safe(cost_chip, data),
                                 safe(guide_chip)) if s)
-    return gutter("claude", [head, safe(context_gauge, data), safe(usage_rows, data), safe(web_row, text),
-                             safe(files_row, text)])
+    refs = [safe(chat_row, text)] if compact() else [safe(web_row, text), safe(files_row, text)]
+    return gutter("claude", [head, safe(context_gauge, data), safe(usage_rows, data), *refs])
 
 
 # ── git (no forks on the hot path) ─────────────────────────────────────────────
@@ -855,7 +963,7 @@ def repo_row(facts):
         ab = ("↑%d" % facts["ahead"] if facts["ahead"] else "") + ("↓%d" % facts["behind"] if facts["behind"] else "")
         parts.append(seg + (" %s%s%s" % (AMB, ab, RST) if ab else ""))
     if facts["files"]:
-        seg = "%sΔ%df%s %s+%d%s/%s−%d%s" % (AMB, facts["files"], RST, GRN, facts["ins"], RST, RED, facts["del"], RST)
+        seg = "%sΔ%df%s %s+%d%s/%s−%d%s" % (BLUE, facts["files"], RST, GRN, facts["ins"], RST, RED, facts["del"], RST)
         parts.append(seg + (" %s·%s%s" % (DIM, facts["area"], RST) if facts["area"] else ""))
     return labelled("repo", BLUE, SEP.join(parts), ICON["repo"])
 
@@ -916,7 +1024,7 @@ def ref_chip(r, info, default_slug, width=34):
         col, word = PR_STATE.get(state, (GRN, "open"))
         return osc8(url, "%s#%d%s %s%s%s" % (col, num, RST, PAPER, repo + title, RST)) + " %s%s%s" % (col, word, RST)
     closed = state == "CLOSED"
-    col = DIM if closed else (AMB if kind == "ticket" else CYN)
+    col = DIM if closed else (MAUVE if kind == "ticket" else CYN)
     chip = osc8(url, "%s#%d%s %s%s%s" % (col, num, RST, DIM if closed else PAPER, repo + title, RST))
     if kind == "ticket":
         chip += " %s▸%s " % (INK, RST) + osc8(info.get("board_url") or "", "%s%s%s" % (col, info.get("status") or "", RST))
@@ -928,7 +1036,7 @@ def ref_chip(r, info, default_slug, width=34):
 def pr_body(pr):
     """The branch's own PR, from gh_poller: title, state, CI, review."""
     state = "draft" if pr.get("draft") and pr.get("state") == "OPEN" else (pr.get("state") or "").lower()
-    col = GRN if state == "open" else MAUVE if state in ("merged", "closed") else AMB
+    col = GRN if state == "open" else MAUVE if state in ("merged", "closed") else DIM
     head = osc8(pr.get("url") or "", "%s#%d%s %s%s%s" % (col, pr["number"], RST, PAPER, cut(pr.get("title") or "", 40), RST))
     parts = [head + (" %s%s%s" % (col, state, RST) if state else "")]
     ci = pr.get("ci") or {}
@@ -936,7 +1044,7 @@ def pr_body(pr):
         if ci.get("fail"):
             parts.append("%s%s %d/%d%s" % (RED, ICON["fail"], ci["fail"], ci["total"], RST))
         elif ci.get("run"):
-            parts.append("%s%s %d running%s" % (AMB, ICON["run"], ci["run"], RST))
+            parts.append("%s%s %d running%s" % (CYN, ICON["run"], ci["run"], RST))
         else:
             parts.append("%s%s %d/%d%s" % (GRN, ICON["ok"], ci.get("pass", 0), ci["total"], RST))
     review = (pr.get("review") or "").replace("_", " ").lower()
@@ -958,17 +1066,23 @@ def refs_rows(text, default_slug, gh=None, data=None, limit=2):
     """Three explicit rows: PR, ticket (an issue on a project board, with its
     column) and issue. The branch's own PR / ticket comes first."""
     gh = gh or {}
-    here = "%s◂ this branch%s" % (GRN, RST)
+    said = []
+
+    def here():
+        """The branch's own PR and ticket get a mark; the words come once."""
+        word = "" if said else " this branch"
+        said.append(1)
+        return " %s◂%s%s" % (GRN, word, RST)
     groups = {"pr": [], "ticket": [], "issue": []}
     pr = gh.get("pr") or stdin_pr(data or {})
     if pr and pr.get("number"):
-        groups["pr"].append(pr_body(pr) + " " + here)
+        groups["pr"].append(pr_body(pr) + here())
     for k in ("task", "epic"):
         t = gh.get(k)
         if t and t.get("number"):
             r = {"slug": default_slug, "number": t["number"], "url": t.get("url")}
             groups["ticket" if t.get("status") else "issue"].append(
-                ref_chip(r, dict(t, kind="ticket" if t.get("status") else "issue"), default_slug) + " " + here)
+                ref_chip(r, dict(t, kind="ticket" if t.get("status") else "issue"), default_slug) + here())
     shown = {(gh.get(k) or {}).get("number") for k in ("task", "epic")} | {(pr or {}).get("number")}
     refs = extract_refs(text, default_slug)[:MAX_LINKS * 3]
     by_slug = {}
@@ -981,7 +1095,7 @@ def refs_rows(text, default_slug, gh=None, data=None, limit=2):
         if kind in groups and not (r["slug"] == default_slug and r["number"] in shown):
             groups[kind].append(ref_chip(r, info, default_slug))
     rows = []
-    for kind, label, col, icon in (("pr", "PR", GRN, ICON["pr"]), ("ticket", "ticket", AMB, ICON["board"]),
+    for kind, label, col, icon in (("pr", "PR", GRN, ICON["pr"]), ("ticket", "ticket", MAUVE, ICON["board"]),
                                    ("issue", "issue", CYN, ICON["refs"])):
         if groups[kind]:
             more = len(groups[kind]) - limit
@@ -1004,7 +1118,7 @@ def github_section(facts, cwd, text, data):
     gh = safe(gh_cache, facts) or {}
     slug = (facts["slug"] if facts else "") or stdin_slug(data)
     rows = [safe(repo_row, facts), safe(dir_row, facts, cwd), *(safe(refs_rows, text, slug, gh, data) or [])]
-    if slug:
+    if slug and not compact():
         rows.append(safe(online_row, slug))
     return gutter("github", rows)
 
@@ -1043,7 +1157,8 @@ def ports_row(cache, facts, limit=3):
     rest = len(ports) - len(chips)
     if not chips and not rest:
         return ""
-    body = DOT.join(chips) + ("%s%s+%d not web%s" % (DIM, "  " if chips else "", rest, RST) if rest else "")
+    more = ("  %d more" % rest) if chips else ("%d listening, none serve a page" % rest)
+    body = DOT.join(chips) + ("%s%s%s" % (DIM, more, RST) if rest else "")
     return labelled("ports", TEAL, body, ICON["ports"])
 
 
@@ -1078,8 +1193,9 @@ def render(data, out=sys.stdout):
     rows += safe(claude_section, data, tail, size, text) or []
     rows += safe(github_section, facts, cwd, text, data) or []
     rows += safe(machine_section, facts) or []
+    width = safe(term_width) or 0
     for r in rows:
-        out.write(r + "\n")
+        out.write((safe(fit, r, width) or r) + "\n")
     out.flush()
 
 
