@@ -21,8 +21,8 @@ const DEFAULT_COLUMNS = 56
 const frame = atom({ plugin: 'neon-sumi', key: 'frame' } as const, { rows: [], at: 0, columns: 0 } as Frame)
 
 // What the render hook last saw: read by the timer, never by the drawing.
+// A hot reload starts these over; the pane itself is the engine's and stays.
 let wantedColumns = DEFAULT_COLUMNS
-let isOpen = false
 let isRunning = false
 
 const RE_TOKEN = /\x1b\[([0-9;:]*)m|\x1b\]8;;(.*?)\x1b\\/g
@@ -88,27 +88,20 @@ export const register: Register = on => {
       description: 'Open the Neon Sumi cockpit in a pane: skills, PRs, inbox, ports, boards',
     })
     $.clock.every(REFRESH_MS, () => {
-      if (isOpen) void refresh($)
+      void refreshIfOpen($)
     })
     return next(e)
   })
 
   on('command.run', { command: COMMAND }, async $ => {
     const opened = await $.ui.open({ id: PANE, title: 'neon sumi', columns: DEFAULT_COLUMNS })
-    isOpen = true
     void refresh($)
     return { text: opened.isPlaced ? 'Cockpit pane opened.' : `Cockpit pane waits: ${opened.reason}` }
-  })
-
-  on('ui.close', { id: PANE }, async (_$, e, next) => {
-    isOpen = false
-    return next(e)
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Link } = $.ui.resolve(e)
     wantedColumns = Math.max(40, e.props.bodyColumns || DEFAULT_COLUMNS)
-    isOpen = true
     const f = await read($, frame)
     const room = Math.max(1, (e.viewport?.rows ?? 40) - 2)
     if (f.error) {
@@ -134,6 +127,12 @@ export const register: Register = on => {
       </Box>
     )
   })
+}
+
+/** The timer's tick: redraw only while our pane is open (asked of the engine, so a reload cannot forget it). */
+async function refreshIfOpen($: EngineInterface) {
+  const panes = await $.ui.panes()
+  if (panes.some(p => p.id === PANE)) await refresh($)
 }
 
 async function refresh($: EngineInterface) {
