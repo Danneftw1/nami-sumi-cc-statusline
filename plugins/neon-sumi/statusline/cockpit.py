@@ -2,11 +2,12 @@
 """Neon Sumi cockpit: the machine-wide view, for a narrow terminal pane.
 
 The status line is per session and has a row budget. Everything that is the
-same in every session lives here instead: your open PRs everywhere, the GitHub
-inbox, every listening port grouped by who owns it, your boards, services and
-docs, and the Claude Code hotkeys worth remembering. Every block is always
-there (an empty one says so) and says how old its data is, so you can trust
-that nothing is missing.
+same in every session lives here instead: the skills Claude loaded this week
+and the ones that stayed silent, your open PRs everywhere, the GitHub inbox,
+every listening port grouped by who owns it, your boards, services and docs,
+and the Claude Code hotkeys worth remembering. Every block is always there (an
+empty one says so) and says how old its data is, so you can trust that nothing
+is missing.
 
 Same caches and collectors as the status line; opening it keeps them fresh
 when no session is running.
@@ -25,6 +26,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REFRESH = 2.0
 WORK_TTL = 300
 NOTIF_TTL = 60
+SKILLS_TTL = 30
+SKILLS_ICON = chr(0xF0EB)
+LIST_MAX = 8
 
 _spec = importlib.util.spec_from_file_location("neon_sumi_statusline", os.path.join(HERE, "statusline.py"))
 sl = importlib.util.module_from_spec(_spec)
@@ -62,6 +66,63 @@ def head(icon, text, colour, note="", fetched=None):
 
 def line(label, colour, body, width=12):
     return "  %s%s%s %s" % (colour, label[:width].ljust(width), RST, body)
+
+
+def word_rows(label, words, width):
+    """`label  a · b · c`, wrapped under the first word, dimmed."""
+    pad = 2 + len(label) + 2
+    rows, cur = [], ""
+    for w in words:
+        cand = w if not cur else cur + " · " + w
+        if cur and pad + len(cand) > width:
+            rows.append(cur)
+            cur = w
+        else:
+            cur = cand
+    rows.append(cur)
+    return ["%s%s%s%s" % (D, ("  %s  " % label) if i == 0 else " " * pad, r, RST) for i, r in enumerate(rows)]
+
+
+def capped(words):
+    return words if len(words) <= LIST_MAX else words[:LIST_MAX] + ["+%d" % (len(words) - LIST_MAX)]
+
+
+def skill_rows(width, limit=6):
+    """Skills that fired in the last 7 days, most used first, each name linked to
+    its SKILL.md; the skills of the same plugins that stayed silent; stops a hook
+    refused today. skills_poller.py reads them from the session transcripts."""
+    cache = sl.read_json(os.path.join(sl.CACHE, "skills.json"))
+    if time.time() - (cache.get("last_attempt") or 0) >= SKILLS_TTL:
+        sl.spawn_detached([sys.executable, "-B", os.path.join(HERE, "skills_poller.py")])
+    if not cache.get("fetched_at"):
+        return [head(SKILLS_ICON, "skills", sl.MAUVE, "reading transcripts…")]
+    known = cache.get("installed") or {}
+    fired = sorted(((k, n, t) for k, (n, t) in (cache.get("fired") or {}).items()), key=lambda f: (-f[1], -f[2]))
+    rows = [head(SKILLS_ICON, "skills", sl.MAUVE, ("%d fired · 7 d" % len(fired)) if fired else "none fired in 7 d",
+                 cache.get("fetched_at"))]
+    nw = min(max([len(k) for k, _, _ in fired[:limit]] + [0]), max(width - 14, 8))
+    for k, n, t in fired[:limit]:
+        name = "%s%-*s%s" % (sl.CYN, nw, sl.cut(k, nw), RST)
+        if k in known:
+            name = sl.osc8(sl.link_for(known[k]) or "file://" + known[k], name)
+        rows.append("  %s %s%3d%s  %s%s%s" % (name, sl.PAPER, n, RST, D, sl.fmt_age(time.time() - t), RST))
+    if fired[limit:]:
+        rows += word_rows("+%d" % len(fired[limit:]), capped([k for k, _, _ in fired[limit:]]), width)
+    group = lambda k: k.split(":", 1)[0] if ":" in k else ""
+    used = {group(k) for k, _, _ in fired}
+    done = {k for k, _, _ in fired}
+    silent = sorted(k for k in known if group(k) in used and k not in done)
+    if silent:
+        rows += word_rows("silent", capped(silent), width)
+    lt = time.localtime()
+    today = time.mktime((lt.tm_year, lt.tm_mon, lt.tm_mday, 0, 0, 0, 0, 0, -1))
+    refused = [r for r in cache.get("refusals") or [] if r[0] >= today]
+    if refused:
+        n = "%d refused today" % len(refused)
+        room = width - 2 - 5 - 3 - len(n) - 2
+        rows.append("  %shooks%s   %s%s%s  %s" % (D, RST, sl.AMB, n, RST,
+                                                 (D + sl.cut(refused[-1][1], room) + RST) if room > 8 else ""))
+    return rows
 
 
 def work_rows(width):
@@ -187,7 +248,7 @@ def frame(width=None):
     usage = sl.safe(sl.usage_rows, sl.read_json(sl.RATE_LIMITS_FILE))
     if usage:
         rows += usage.split("\n") + [""]
-    for block in (key_rows, work_rows, inbox_rows, port_rows, link_rows):
+    for block in (skill_rows, key_rows, work_rows, inbox_rows, port_rows, link_rows):
         got = sl.safe(block, width)
         if got:
             rows += got + [""]
