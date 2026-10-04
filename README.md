@@ -5,7 +5,8 @@
 Context left, the 5-hour and weekly limits, the branch and its PR, the tickets you mentioned, the dev server that is
 actually up. One glance below the prompt, drawn as neon tubes on an ink-wash scroll.
 
-Free and open source (MIT). Python standard library only. Three commands to install.
+Free and open source (MIT). Python standard library only, plus one TypeScript module that Claude Code itself runs
+for the cockpit pane. Three commands to install.
 
 ![Neon Sumi in Ghostty, with the shader on](docs/neon-sumi.png)
 
@@ -16,13 +17,14 @@ your browser, with a toggle for terminals without shaders. The repo, tickets and
 
 - **You stop asking.** How much context is left, whether CI passed, which port the app is on: the answers are already
   on screen, refreshed every second.
-- **It stays out of the way.** About 25 ms per render, one Python process, and nothing on the render path touches the
+- **It stays out of the way.** About 30 ms per render on a current Python (about 150 ms on the Python 3.9 macOS
+  ships, which the install skill steers you off), one Python process, and nothing on the render path touches the
   network. GitHub and ports are collected in the background and share one cache across every open session.
 - **Colour means something.** Neon is reserved for what is live: bar fills, percentages, state, links. Everything
   static is warm ink and paper. Bars turn amber at 70 % and red at 85 %, so the only thing that stands out is the
   thing that needs you.
 - **Nothing to take on trust.** No pip install, no account, no telemetry. It talks to your own `localhost` and, through
-  your own `gh`, to GitHub. About 2,000 lines of Python you can read in an afternoon.
+  your own `gh`, to GitHub. About 2,500 lines of Python and 180 of TypeScript you can read in an afternoon.
 
 ## Install
 
@@ -36,11 +38,12 @@ In Claude Code:
 
 The install skill copies the files to `~/.claude/neon-sumi/`, renders once so you can see it works, and asks before it
 changes `statusLine` and `subagentStatusLine` in `~/.claude/settings.json`. It keeps a backup of your settings.
-Plugins cannot set the status line themselves, which is why that last step exists. When the plugin updates, run
-`/neon-sumi:install` again: it copies the new files and keeps your `config.json`.
+A plugin cannot change `statusLine` in `settings.json`, which is why that last step exists. When the plugin updates,
+run `/neon-sumi:install` again: it copies the new files and keeps your `config.json`.
 
-**Needs**: Python 3.9+, a [Nerd Font](https://www.nerdfonts.com) in the terminal, `git`. Optional: an authenticated
-`gh` for the GitHub rows and the cockpit, `jq` for the subagent line, `docker` for container ports.
+**Needs**: Python 3.9+ as `python3` on your PATH, a [Nerd Font](https://www.nerdfonts.com) in the terminal, `git`.
+Optional: an authenticated `gh` for the GitHub rows and the cockpit, `jq` for the subagent line, `docker` for container
+ports.
 
 <details>
 <summary>Manual install</summary>
@@ -74,9 +77,21 @@ files on one row and leaves out the online row.
 
 ## The cockpit
 
-Everything that is the same in every session lives in a separate view for a narrow split pane: the skills Claude
-loaded this week and the ones that stayed silent, all your open PRs, the GitHub inbox, every port grouped by owner,
-your boards. Every block says how old its data is.
+Everything that is the same in every session lives in a separate view for a narrow pane: your 5-hour and weekly
+limits, every port grouped by owner, all your open PRs, the GitHub inbox, the skills Claude loaded this week and the
+ones that stayed silent, your boards. Live data comes first, and every block says how old its data is.
+
+```
+/neon-sumi-cockpit
+```
+
+opens it as a pane inside Claude Code, redrawn every two seconds at the pane's width: beside the transcript in the
+fullscreen layout from 110 columns, above the prompt otherwise. Close it with the pane's close mark or `ctrl+x x`. It
+needs Claude Code 2.1.287 or newer, where a plugin may draw a pane, and `python3` on your PATH. The command is there as
+soon as the plugin is enabled, and the pane takes its 5-hour and weekly bars from the session itself, so it needs no
+install step.
+
+The same view runs in any terminal split, for older Claude Code or a tmux pane of its own:
 
 ```
 python3 -B ~/.claude/neon-sumi/cockpit.py

@@ -6,7 +6,7 @@
       <feGaussianBlur stdDeviation="16"/>
     </filter>
     <radialGradient id="wash" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#1E181A"/>
+      <stop offset="0" stop-color="#1E191A"/>
       <stop offset="1" stop-color="#0F0C0D"/>
     </radialGradient>
   </defs>

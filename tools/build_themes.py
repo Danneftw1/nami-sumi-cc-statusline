@@ -3,7 +3,7 @@
 
     python3 tools/build_themes.py           write design/tokens.css and themes/*, and sync the
                                             palette lines of the Obsidian theme and Ghostty config
-    python3 tools/build_themes.py --check   also list colour literals in the repo that are not tokens
+    python3 tools/build_themes.py --check   also list colour literals in the repo that are not tokens; exit 1 if any
 
 Standard library only, Python 3.9+. Every generated file says so; edit the tokens instead.
 Files are only rewritten when their content changes, so a no-op run leaves git clean.
@@ -504,8 +504,8 @@ def main():
         print("  wrote " + rel)
     if not CHANGED:
         print("  everything already matches design/tokens.json")
-    if "--check" in sys.argv:
-        check(tokens)
+    if "--check" in sys.argv and check(tokens):
+        sys.exit(1)
 
 
 if __name__ == "__main__":
