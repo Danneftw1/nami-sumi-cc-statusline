@@ -5,8 +5,9 @@ description: Install or update the Neon Sumi status line, subagent line and cock
 
 # Install Neon Sumi
 
-Plugins cannot set `statusLine`, so this skill copies the files to a stable place and, with the user's
-confirmation, points `settings.json` at them. Follow the steps in order and report what you did.
+A plugin cannot change `statusLine`, so this skill copies the files to a stable place and, with the user's
+confirmation, points `settings.json` at them. The cockpit pane needs none of this: `/neon-sumi-cockpit` works
+from the plugin folder as soon as the plugin is enabled. Follow the steps in order and report what you did.
 
 ## 1. Check the requirements
 
@@ -59,7 +60,8 @@ If the user already has a `statusLine`, show it next to the new one and say that
 
 ## 5. Tell the user what else is there
 
-- Cockpit, for a narrow split pane: `<python> -B ~/.claude/neon-sumi/cockpit.py`
+- Cockpit: `/neon-sumi-cockpit` opens it as a pane inside Claude Code (2.1.286 or newer). In an older Claude
+  Code, or in a tmux or iTerm2 split of its own: `<python> -B ~/.claude/neon-sumi/cockpit.py`
 - Links per repo, boards, services and a guide link: copy `config.example.json` to `config.json` and edit.
 - Ghostty edition: tubes, a sparkline and pace on the 5h row, and a shader that makes the neon glow. Add
   `config-file = ~/.claude/neon-sumi/ghostty/neon-sumi.ghostty` to the Ghostty config. The status line

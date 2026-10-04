@@ -36,11 +36,12 @@ In Claude Code:
 
 The install skill copies the files to `~/.claude/neon-sumi/`, renders once so you can see it works, and asks before it
 changes `statusLine` and `subagentStatusLine` in `~/.claude/settings.json`. It keeps a backup of your settings.
-Plugins cannot set the status line themselves, which is why that last step exists. When the plugin updates, run
-`/neon-sumi:install` again: it copies the new files and keeps your `config.json`.
+A plugin cannot change `statusLine` in `settings.json`, which is why that last step exists. When the plugin updates,
+run `/neon-sumi:install` again: it copies the new files and keeps your `config.json`.
 
-**Needs**: Python 3.9+, a [Nerd Font](https://www.nerdfonts.com) in the terminal, `git`. Optional: an authenticated
-`gh` for the GitHub rows and the cockpit, `jq` for the subagent line, `docker` for container ports.
+**Needs**: Python 3.9+ as `python3` on your PATH, a [Nerd Font](https://www.nerdfonts.com) in the terminal, `git`.
+Optional: an authenticated `gh` for the GitHub rows and the cockpit, `jq` for the subagent line, `docker` for container
+ports.
 
 <details>
 <summary>Manual install</summary>
@@ -74,9 +75,19 @@ files on one row and leaves out the online row.
 
 ## The cockpit
 
-Everything that is the same in every session lives in a separate view for a narrow split pane: the skills Claude
-loaded this week and the ones that stayed silent, all your open PRs, the GitHub inbox, every port grouped by owner,
-your boards. Every block says how old its data is.
+Everything that is the same in every session lives in a separate view for a narrow pane: the skills Claude loaded
+this week and the ones that stayed silent, all your open PRs, the GitHub inbox, every port grouped by owner, your
+boards. Every block says how old its data is.
+
+```
+/neon-sumi-cockpit
+```
+
+opens it as a pane inside Claude Code, beside the transcript, redrawn every two seconds at the pane's width. Close it
+with the pane's close mark or `ctrl+x x`. It needs Claude Code 2.1.286 or newer, where a plugin may draw a pane; the
+command appears once the plugin is installed, no install step.
+
+The same view runs in any terminal split, for older Claude Code or a tmux pane of its own:
 
 ```
 python3 -B ~/.claude/neon-sumi/cockpit.py
