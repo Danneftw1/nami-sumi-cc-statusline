@@ -352,6 +352,11 @@ def build_claude_code(T, meta):
         "selectionBg": c.selection,
         "rate_limit_fill": c.cyan, "rate_limit_empty": T["statusline.meter.track"],
         "briefLabelYou": c.cyan, "briefLabelClaude": c.magenta,
+        "background": c.sumi, "composerSidebarBackground": c.deep,
+        "skill": c.violet, "autoAcceptShimmer": lift(c.violet),
+        "claudeBlue_FOR_SYSTEM_SPINNER": c.blue, "claudeBlueShimmer_FOR_SYSTEM_SPINNER": lift(c.blue),
+        "professionalBlue": c.blue, "chromeYellow": c.gold,
+        "clawd_body": c.magenta, "clawd_background": c.sumi,
     }
     for name, h in (("red", c.red), ("blue", c.blue), ("green", c.mint), ("yellow", c.gold), ("purple", c.violet),
                     ("orange", c.amber), ("pink", c.magenta), ("cyan", c.cyan)):
