@@ -285,7 +285,7 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
 <section id="more">
   <h2>Also in the box</h2>
   <div class="tiles">
-    <figure class="tile"><canvas id="ck" aria-label="The cockpit, one frame"></canvas><figcaption><b>The cockpit</b> · <code>/neon-sumi-cockpit</code> opens it as a pane inside Claude Code: what is the same in every session, the skills Claude loaded this week, your PRs, the inbox, every port by owner.</figcaption></figure>
+    <figure class="tile"><canvas id="ck" aria-label="The cockpit, one frame"></canvas><figcaption><b>The cockpit</b> · <code>/neon-sumi-cockpit</code> opens it as a pane inside Claude Code: what is the same in every session, your limits, every port by owner, your PRs, the inbox, the skills Claude loaded this week.</figcaption></figure>
     <figure class="tile"><img src="obsidian.png" width="1800" height="1157" loading="lazy" alt="The Obsidian theme: neon headings and links on an ink-black note"><figcaption><b>Obsidian</b> · the same palette for your notes, and a profile for the Terminal plugin.</figcaption></figure>
     <figure class="tile"><img src="themes.png" width="1600" height="950" loading="lazy" alt="A terminal in the Neon Sumi palette, with the sixteen colours along the bottom"><figcaption><b>Matching themes</b> · Ghostty, iTerm2, Zed and Claude Code's own <code>/theme</code>, from one token file.</figcaption></figure>
   </div>

@@ -77,9 +77,9 @@ files on one row and leaves out the online row.
 
 ## The cockpit
 
-Everything that is the same in every session lives in a separate view for a narrow pane: the skills Claude loaded
-this week and the ones that stayed silent, all your open PRs, the GitHub inbox, every port grouped by owner, your
-boards. Every block says how old its data is.
+Everything that is the same in every session lives in a separate view for a narrow pane: your 5-hour and weekly
+limits, every port grouped by owner, all your open PRs, the GitHub inbox, the skills Claude loaded this week and the
+ones that stayed silent, your boards. Live data comes first, and every block says how old its data is.
 
 ```
 /neon-sumi-cockpit
@@ -87,7 +87,7 @@ boards. Every block says how old its data is.
 
 opens it as a pane inside Claude Code, redrawn every two seconds at the pane's width: beside the transcript in the
 fullscreen layout from 110 columns, above the prompt otherwise. Close it with the pane's close mark or `ctrl+x x`. It
-needs Claude Code 2.1.286 or newer, where a plugin may draw a pane, and `python3` on your PATH. The command is there as
+needs Claude Code 2.1.287 or newer, where a plugin may draw a pane, and `python3` on your PATH. The command is there as
 soon as the plugin is enabled, and the pane takes its 5-hour and weekly bars from the session itself, so it needs no
 install step.
 

@@ -163,7 +163,8 @@ async function refresh($: EngineInterface) {
       limits[w.kind] = { used_percentage: w.percentUsed, ...(resets ? { resets_at: resets } : {}) }
     }
     const env: Record<string, string> = { COLUMNS: String(columns) }
-    if (Object.keys(limits).length) env.NEON_SUMI_RATE_LIMITS = JSON.stringify({ rate_limits: limits, fetched_at: Date.now() / 1000 })
+    // No age: the session says what the last response reported, not when; the pane draws none rather than a false one.
+    if (Object.keys(limits).length) env.NEON_SUMI_RATE_LIMITS = JSON.stringify({ rate_limits: limits })
     const ran = await $.process.run(['python3', '-B', script, '--once'], { env, timeoutMs: 15000 })
     if (ran.exitCode !== 0) {
       await update($, frame, f => ({ ...f, at: Date.now(), columns, error: ran.stderr.trim().split('\n').slice(-3).join('\n') || `exit ${ran.exitCode}` }))

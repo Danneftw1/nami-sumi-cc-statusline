@@ -267,11 +267,11 @@ def usage_block(width):
         data = {}
     if not (data.get("rate_limits") or {}):
         return [head(sl.ICON["5h"], "usage", sl.TEAL, "no session has reported limits yet")]
-    fetched = data.get("fetched_at")
-    if not fetched and not given and os.path.isfile(sl.RATE_LIMITS_FILE):
-        fetched = os.path.getmtime(sl.RATE_LIMITS_FILE)
+    # The pane's figures are the session's own, live by construction: no age. The file's age is its own stamp.
+    fetched = None if given else (data.get("fetched_at") or
+                                  (os.path.getmtime(sl.RATE_LIMITS_FILE) if os.path.isfile(sl.RATE_LIMITS_FILE) else None))
     bars = sl.safe(sl.usage_rows, data)
-    rows = [head(sl.ICON["5h"], "usage", sl.TEAL, "", fetched, 60)]
+    rows = [head(sl.ICON["5h"], "usage", sl.TEAL, "this session" if given else "", fetched, 60)]
     return rows + (bars.split("\n") if bars else [])
 
 

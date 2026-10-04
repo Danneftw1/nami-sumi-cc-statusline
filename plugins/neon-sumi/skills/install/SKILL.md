@@ -62,7 +62,7 @@ If the user already has a `statusLine`, show it next to the new one and say that
 
 ## 5. Tell the user what else is there
 
-- Cockpit: `/neon-sumi-cockpit` opens it as a pane inside Claude Code (2.1.286 or newer). In an older Claude
+- Cockpit: `/neon-sumi-cockpit` opens it as a pane inside Claude Code (2.1.287 or newer). In an older Claude
   Code, or in a tmux or iTerm2 split of its own: `<python> -B ~/.claude/neon-sumi/cockpit.py`
 - Links per repo, boards, services and a guide link: copy `config.example.json` to `config.json` and edit.
 - Ghostty edition: tubes, a sparkline and pace on the 5h row, and a shader that makes the neon glow. Add
