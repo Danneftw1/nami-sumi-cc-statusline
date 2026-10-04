@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .DS_Store
 config.json
+.claude/
+plugins/neon-sumi/.claude-plugin/types/
+plugins/neon-sumi/tsconfig.json
