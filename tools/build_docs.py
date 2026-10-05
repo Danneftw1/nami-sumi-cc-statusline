@@ -182,7 +182,7 @@ TEMPLATE = r"""<!doctype html>
 :root {
   color-scheme: dark;
   --deep: #0b090a; --sumi: #0f0c0d; --sumi-hi: #131011; --line: #2c2426; --ink: #544a46; --stone: #928678;
-  --soft: #cbbfa9; --paper: #e8dcc6; --bright: #f7efe2; --magenta: #ff2ec4; --violet: #c46eff; --teal: #00ffcc;
+  --soft: #cbbfa9; --paper: #e8dcc6; --bright: #f7efe2; --magenta: #ff2ec4; --violet: #c46eff; --teal: #00ffcc; --gold: #ffd76e;
   --mono: "NS Mono", ui-monospace, Menlo, monospace;
   --sans: "Zen Kaku Gothic New", "Hiragino Sans", system-ui, sans-serif;
 }
@@ -191,18 +191,41 @@ html, body { margin: 0; }
 body { background: var(--sumi); color: var(--paper); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
 .wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 48px 64px; display: grid; gap: 40px; }
 .wrap > *, section > *, header > * { min-width: 0; }
-header { display: grid; gap: 12px; }
+header { display: grid; gap: 28px; align-items: end; }
+@media (min-width: 980px) { header { grid-template-columns: minmax(0, 1fr) minmax(0, 560px); } }
+.pitch, .order { display: grid; gap: 12px; align-content: end; min-width: 0; }
+/* The 90s props: small, at the edges, never brighter than the stage. */
+.deco { pointer-events: none; }
+.title { position: relative; justify-self: start; }
+.spark { position: absolute; fill: var(--bright); opacity: .75; }
+.spark.a { width: 15px; top: 2px; right: -22px; } .spark.b { width: 9px; top: 26px; right: -34px; opacity: .5; }
+.burst { position: absolute; top: -30px; right: -12px; width: 70px; transform: rotate(12deg); color: var(--gold); }
+@media (max-width: 520px) { .burst { width: 58px; top: -22px; right: -10px; } }
+.burst polygon { fill: var(--sumi); stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+.burst text, .seal text, .sticker text { fill: currentColor; font-family: var(--mono); font-weight: 700; }
+.label { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--stone); }
+.label b { color: var(--magenta); font-weight: 400; }
+.footage { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--stone); margin: 0 0 8px 2px; }
+.footage b { color: var(--magenta); font-weight: 400; }
+h2 em { font-style: normal; color: var(--magenta); text-shadow: 0 0 14px rgba(255,46,196,.45); }
+.tile { position: relative; }
+.sticker { position: absolute; top: 10px; right: 12px; width: 52px; transform: rotate(-10deg); color: var(--gold); }
+.sticker polygon { fill: var(--sumi); stroke: currentColor; stroke-width: 3; stroke-linejoin: round; }
+.fine { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 18px; align-items: center; }
+.seal { width: 88px; color: var(--stone); transform: rotate(-8deg); }
+.fine ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-family: var(--mono); font-size: 12px; color: var(--stone); }
+.fine code { font-size: 1em; color: var(--soft); }
 .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--stone); text-transform: uppercase; }
 .eyebrow b { color: var(--magenta); font-weight: 400; }
 h1 { font-size: clamp(38px, 7vw, 66px); line-height: 1.02; margin: 0; font-weight: 700; }
 h1 em { font-style: normal; color: var(--magenta); text-shadow: 0 0 22px rgba(255,46,196,.55), 0 0 4px rgba(255,46,196,.5); }
-.lede { max-width: 64ch; color: var(--stone); margin: 0; } .lede b { color: var(--paper); font-weight: 500; }
+.lede { max-width: 52ch; color: var(--stone); margin: 0; } .lede b { color: var(--paper); font-weight: 500; }
 .facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; font-family: var(--mono); font-size: 12px; }
 .facts li { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--soft); }
 .cmd { position: relative; max-width: 760px; }
 pre { margin: 0; font-family: var(--mono); font-size: 13.5px; line-height: 1.6; background: var(--deep); border: 1px solid var(--line);
   border-radius: 8px; padding: 12px 14px; color: var(--paper); white-space: pre-wrap; overflow-wrap: anywhere; }
-pre .c { color: var(--stone); }
+pre .c { color: var(--stone); display: inline-block; max-width: calc(100% - 56px); } /* wraps before the FREE! burst */
 .copy { position: absolute; bottom: 9px; right: 9px; font-family: var(--mono); font-size: 13px; color: var(--sumi); background: var(--magenta);
   border: 1px solid var(--magenta); border-radius: 8px; padding: 4px 12px; min-height: 28px; cursor: pointer; box-shadow: 0 0 18px rgba(255,46,196,.45); }
 .copy:hover { box-shadow: 0 0 26px rgba(255,46,196,.7); } .copy:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
@@ -248,22 +271,30 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
 <body>
 <div class="wrap">
 <header>
-  <div class="eyebrow">A status line for Claude Code</div>
-  <h1>Neon Sumi, <em>lit</em></h1>
-  <p class="lede">Context left, the 5-hour and weekly limits, the branch and its PR, the dev server that is actually up. <b>One glance below the prompt,</b> so you don't have to ask.</p>
-  <ul class="facts"><li>free · MIT</li><li>Python standard library, one TypeScript module</li><li>~30 ms per render on Python 3.11+</li><li>no network on the render path</li><li>no telemetry</li><li>fits any width</li></ul>
-  <div class="cmd" id="install">
-<pre id="cmds"><span class="c"># in Claude Code: add the marketplace, install, let the skill wire it up</span>
+  <div class="pitch">
+    <div class="eyebrow"><b>★</b> As seen below your prompt <b>★</b></div>
+    <div class="title"><h1>Neon Sumi, <em>lit</em></h1>
+      <svg class="deco spark a" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z"/></svg><svg class="deco spark b" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z"/></svg></div>
+    <p class="lede">Tired of asking Claude how much context is left? Squinting at CI? Guessing which port your app is on? <b>Never ask again.</b></p>
+    <ul class="facts"><li>100% free · MIT</li><li>no batteries required: stdlib + one TS module</li><li>~30 ms a render*</li><li>no network on the render path</li><li>zero telemetry</li><li>fits ANY width</li></ul>
+    <div class="cta"><a class="btn" href="__REPO__">Look under the hood ↗</a></div>
+  </div>
+  <div class="order">
+    <div class="label"><b>Order now</b> · operators are standing by</div>
+    <div class="cmd" id="install">
+<pre id="cmds"><span class="c"># type these in Claude Code, one at a time</span>
 /plugin marketplace add __SLUG__
 /plugin install neon-sumi@neon-sumi
 /neon-sumi:install</pre>
-    <button type="button" class="copy" id="copy" aria-label="Copy the install commands">copy</button>
+      <button type="button" class="copy" id="copy" aria-label="Copy the install commands">copy now</button>
+      <svg class="deco burst" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50.0,2.0 57.4,12.7 68.4,5.7 71.1,18.4 83.9,16.1 81.6,28.9 94.3,31.6 87.3,42.6 98.0,50.0 87.3,57.4 94.3,68.4 81.6,71.1 83.9,83.9 71.1,81.6 68.4,94.3 57.4,87.3 50.0,98.0 42.6,87.3 31.6,94.3 28.9,81.6 16.1,83.9 18.4,71.1 5.7,68.4 12.7,57.4 2.0,50.0 12.7,42.6 5.7,31.6 18.4,28.9 16.1,16.1 28.9,18.4 31.6,5.7 42.6,12.7"/><text x="50" y="57" text-anchor="middle" font-size="21">FREE!</text></svg>
+    </div>
+    <p class="small">Not sold in stores. Step three copies the files to <code>~/.claude/neon-sumi/</code>, renders once and asks before it touches <code>settings.json</code>. Backup included.</p>
   </div>
-  <p class="small">The last step copies the files to <code>~/.claude/neon-sumi/</code>, renders once, and asks before it touches <code>settings.json</code> (with a backup). Needs Python 3.9+ as <code>python3</code> on your PATH, a Nerd Font and <code>git</code>; <code>gh</code> lights up the GitHub rows.</p>
-  <div class="cta"><a class="btn" href="__REPO__">Source on GitHub</a></div>
 </header>
 
 <div>
+<p class="footage"><b>▶</b> actual footage · dramatised repo</p>
 <div class="stage" id="stage">
   <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span id="cap">ghostty · neon-sumi.glsl · live</span>
     <span class="toggle" role="group" aria-label="Edition">
@@ -275,20 +306,32 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
 </div>
 
 <ol class="legend" aria-label="What the numbers point at">
-  <li><i>1</i><span>Context, 5-hour and weekly use. Cool at rest, amber at 70 %, red at 85 %.</span></li>
-  <li id="lg2"><i>2</i><span>Where the 5-hour window lands at reset, at the current pace.</span></li>
-  <li><i>3</i><span>Links and readable files from the chat, clickable.</span></li>
-  <li><i>4</i><span>Branch, diff and worktree, then every PR, ticket and issue mentioned, with its title and state.</span></li>
-  <li><i>5</i><span>Dev servers that actually serve a page.</span></li>
+  <li><i>1</i><span>Context, 5-hour and weekly limits. Cool at rest, amber at 70 %, red at 85 %. Never get caught short again!</span></li>
+  <li id="lg2"><i>2</i><span>Where your 5-hour window lands at reset, at today's pace. It's a crystal ball for your quota!</span></li>
+  <li><i>3</i><span>Every link and readable file from the chat, one click away. No more scrolling back!</span></li>
+  <li><i>4</i><span>Branch, diff, worktree, and every PR, ticket and issue you mentioned, with titles. Your whole repo at a glance!</span></li>
+  <li><i>5</i><span>Only the dev servers that actually answer. No more guessing ports!</span></li>
 </ol>
 
 <section id="more">
-  <h2>Also in the box</h2>
+  <h2>But wait, <em>there's more!</em></h2>
   <div class="tiles">
-    <figure class="tile"><canvas id="ck" aria-label="The cockpit, one frame"></canvas><figcaption><b>The cockpit</b> · <code>/neon-sumi-cockpit</code> opens it as a pane inside Claude Code: what is the same in every session, your limits, every port by owner, your PRs, the inbox, the skills Claude loaded this week.</figcaption></figure>
-    <figure class="tile"><img src="obsidian.png" width="1800" height="1157" loading="lazy" alt="The Obsidian theme: neon headings and links on an ink-black note"><figcaption><b>Obsidian</b> · the same palette for your notes, and a profile for the Terminal plugin.</figcaption></figure>
-    <figure class="tile"><img src="themes.png" width="1600" height="950" loading="lazy" alt="A terminal in the Neon Sumi palette, with the sixteen colours along the bottom"><figcaption><b>Matching themes</b> · Ghostty, iTerm2, Zed and Claude Code's own <code>/theme</code>, from one token file.</figcaption></figure>
+    <figure class="tile"><canvas id="ck" aria-label="The cockpit, one frame"></canvas><svg class="deco sticker" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50.0,2.0 57.4,12.7 68.4,5.7 71.1,18.4 83.9,16.1 81.6,28.9 94.3,31.6 87.3,42.6 98.0,50.0 87.3,57.4 94.3,68.4 81.6,71.1 83.9,83.9 71.1,81.6 68.4,94.3 57.4,87.3 50.0,98.0 42.6,87.3 31.6,94.3 28.9,81.6 16.1,83.9 18.4,71.1 5.7,68.4 12.7,57.4 2.0,50.0 12.7,42.6 5.7,31.6 18.4,28.9 16.1,16.1 28.9,18.4 31.6,5.7 42.6,12.7"/><text x="50" y="58" text-anchor="middle" font-size="24">NEW!</text></svg><figcaption><b>The cockpit!</b> · Type <code>/neon-sumi-cockpit</code> and get a whole pane: your limits, every port by owner, your PRs, the inbox and this week's skills.</figcaption></figure>
+    <figure class="tile"><img src="obsidian.png" width="1800" height="1157" loading="lazy" alt="The Obsidian theme: neon headings and links on an ink-black note"><figcaption><b>Obsidian, too!</b> · The same glow for your notes, plus a profile for the Terminal plugin.</figcaption></figure>
+    <figure class="tile"><img src="themes.png" width="1600" height="950" loading="lazy" alt="A terminal in the Neon Sumi palette, with the sixteen colours along the bottom"><figcaption><b>Matching themes!</b> · Ghostty, iTerm2, Zed and Claude Code's own <code>/theme</code>, all from one token file. Collect them all!</figcaption></figure>
   </div>
+</section>
+
+<section class="fine" aria-label="The fine print">
+  <svg class="deco seal" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="ring" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0"/></defs>
+    <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"/><circle cx="50" cy="50" r="27" fill="none" stroke="currentColor" stroke-width="1"/>
+    <text font-size="8" letter-spacing="1.1"><textPath href="#ring">MONEY-BACK GUARANTEE ★ 100% FREE ★</textPath></text>
+    <text x="50" y="50" text-anchor="middle" font-size="15">100%</text><text x="50" y="62" text-anchor="middle" font-size="6.5">GUARANTEED**</text></svg>
+  <ul>
+    <li>* ~30 ms on Python 3.11+. Needs Python 3.9+ as <code>python3</code> on your PATH, a Nerd Font and <code>git</code>.</li>
+    <li><code>gh</code> sold separately (also free). It lights up the GitHub rows.</li>
+    <li>** It's free. Repo, tickets and ports shown are dramatised. No terminals were harmed.</li>
+  </ul>
 </section>
 
 <footer><b style="color:var(--magenta);font-weight:400">Neon Sumi</b> · MIT · <a href="__REPO__">source, issues and docs on GitHub</a> · typeset in Maple Mono (SIL OFL 1.1) · icons from Nerd Fonts</footer>
@@ -297,7 +340,7 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
 <script>
 document.getElementById("copy").addEventListener("click", function () {
   const b = this, text = document.getElementById("cmds").textContent.split("\n").filter(l => l.startsWith("/")).join("\n");
-  navigator.clipboard.writeText(text).then(() => { b.textContent = "copied"; setTimeout(() => { b.textContent = "copy"; }, 1600); },
+  navigator.clipboard.writeText(text).then(() => { b.textContent = "copied!"; setTimeout(() => { b.textContent = "copy now"; }, 1600); },
     () => { b.textContent = "select and copy"; });
 });
 </script>
@@ -426,7 +469,7 @@ document.getElementById("copy").addEventListener("click", function () {
     draw();
     let r = null;
     try { r = webgl(); } catch (e) { r = null; st.textContent = "shader did not compile: " + e.message; }
-    const note = () => narrow() ? "the same line at " + (width(rowsFor()) | 0) + " columns: it fits itself to the pane" : null;
+    const note = () => narrow() ? "the same line at " + (width(rowsFor()) | 0) + " columns. It fits ANY pane!" : null;
     if (!r) {
       const c = lit.getContext("2d");
       const flat = () => { draw(); lit.width = src.width; lit.height = src.height; c.drawImage(src, 0, 0); pins(); };
@@ -449,7 +492,7 @@ document.getElementById("copy").addEventListener("click", function () {
     const t0 = performance.now();
     if (reduce) { r.frame(1.2); pins(); st.textContent = note() || "still frame · reduced motion is on"; return; }
     r.frame(0); pins();
-    st.textContent = note() || "live · the cursor on the prompt shows the comet";
+    st.textContent = note() || "live · watch the comet chase the cursor";
     let visible = true, last = 0;
     new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible) requestAnimationFrame(loop); }).observe(lit);
     function loop(now) {
