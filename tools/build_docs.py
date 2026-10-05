@@ -175,7 +175,7 @@ TEMPLATE = r"""<!doctype html>
 <meta name="twitter:image" content="__SITE__og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
 <style>
 @font-face { font-family: "NS Mono"; src: url(data:font/woff2;base64,__NS_REGULAR__) format("woff2"); font-weight: 400; }
 @font-face { font-family: "NS Mono"; src: url(data:font/woff2;base64,__NS_BOLD__) format("woff2"); font-weight: 700; }
@@ -196,30 +196,42 @@ header { display: grid; gap: 28px; align-items: end; }
 .pitch, .order { display: grid; gap: 12px; align-content: end; min-width: 0; }
 /* The 90s props: small, at the edges, never brighter than the stage. */
 .deco { pointer-events: none; }
-.title { position: relative; justify-self: start; }
-.spark { position: absolute; fill: var(--bright); opacity: .75; }
-.spark.a { width: 15px; top: 2px; right: -22px; } .spark.b { width: 9px; top: 26px; right: -34px; opacity: .5; }
-.burst { position: absolute; top: -30px; right: -12px; width: 70px; transform: rotate(12deg); color: var(--gold); }
-@media (max-width: 520px) { .burst { width: 58px; top: -22px; right: -10px; } }
-.burst polygon { fill: var(--sumi); stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
-.burst text, .seal text, .sticker text { fill: currentColor; font-family: var(--mono); font-weight: 700; }
+.burst { position: absolute; top: -38px; right: -10px; width: 88px; transform: rotate(12deg); filter: drop-shadow(0 0 10px rgba(255,215,110,.35)); }
+@media (max-width: 520px) { .burst { width: 60px; top: -32px; right: -8px; } }
+.burst polygon { fill: var(--gold); }
+.burst text { fill: var(--sumi); }
+.burst text, .seal text { font-family: var(--mono); font-weight: 700; } .seal text { fill: currentColor; }
 .label { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--stone); }
 .label b { color: var(--magenta); font-weight: 400; }
 .footage { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--stone); margin: 0 0 8px 2px; }
 .footage b { color: var(--magenta); font-weight: 400; }
-h2 em { font-style: normal; color: var(--magenta); text-shadow: 0 0 14px rgba(255,46,196,.45); }
+#more h2 { font-size: clamp(28px, 4vw, 42px); }
 .tile { position: relative; }
-.sticker { position: absolute; top: 10px; right: 12px; width: 52px; transform: rotate(-10deg); color: var(--gold); }
-.sticker polygon { fill: var(--sumi); stroke: currentColor; stroke-width: 3; stroke-linejoin: round; }
-.fine { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 18px; align-items: center; }
-.seal { width: 88px; color: var(--stone); transform: rotate(-8deg); }
+.fine { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 22px; align-items: center; }
+.seal { width: 112px; color: var(--gold); transform: rotate(-8deg); }
 .fine ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-family: var(--mono); font-size: 12px; color: var(--stone); }
 .fine code { font-size: 1em; color: var(--soft); }
 .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--stone); text-transform: uppercase; }
 .eyebrow b { color: var(--magenta); font-weight: 400; }
-h1 { font-size: clamp(38px, 7vw, 66px); line-height: 1.02; margin: 0; font-weight: 700; }
-h1 em { font-style: normal; color: var(--magenta); text-shadow: 0 0 22px rgba(255,46,196,.55), 0 0 4px rgba(255,46,196,.5); }
-.lede { max-width: 52ch; color: var(--stone); margin: 0; } .lede b { color: var(--paper); font-weight: 500; }
+h1 { font-size: clamp(40px, 7vw, 72px); line-height: 1.02; margin: 0; }
+/* Headings: the plain words are a solid object, the <em> is the light. Shadows fall away from it, the near edge picks up its pink. */
+h1, h2, .tagline { font-weight: 900; letter-spacing: -.01em; isolation: isolate; }
+.solid { display: inline-block; color: var(--bright);
+  filter: drop-shadow(-1px 1px 0 #3a1a36) drop-shadow(-1px 1px 0 #2b1429) drop-shadow(-1px 1px 0 #1f0f1f) drop-shadow(-1px 1px 0 #160a16) drop-shadow(-8px 12px 18px rgba(0,0,0,.75)); }
+h2 .solid, .tagline .solid { filter: drop-shadow(-1px 1px 0 #3a1a36) drop-shadow(-1px 1px 0 #241123) drop-shadow(-1px 1px 0 #160a16) drop-shadow(-5px 8px 12px rgba(0,0,0,.75)); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .solid { background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0) 48%), linear-gradient(100deg, var(--bright) 0%, var(--paper) 72%, #f5cfe6 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .tagline .solid { background-image: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0) 48%), linear-gradient(100deg, var(--bright), var(--paper)); }
+}
+h1 em, h2 em { position: relative; display: inline-block; font-style: normal; color: #ff3fca;
+  text-shadow: 0 0 2px rgba(255,140,225,.9), 0 0 10px rgba(255,46,196,.85), 0 0 26px rgba(255,46,196,.55), 0 0 56px rgba(255,46,196,.3); }
+h2 em { text-shadow: 0 0 2px rgba(255,140,225,.9), 0 0 7px rgba(255,46,196,.8), 0 0 18px rgba(255,46,196,.45), 0 0 36px rgba(255,46,196,.22); }
+h1 em::before, h2 em::before { content: ""; position: absolute; inset: -70% -32px; z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255,46,196,.14), rgba(255,46,196,.04) 60%, transparent); }
+@media (forced-colors: active) { .solid { background: none; filter: none; -webkit-text-fill-color: CanvasText; } h1 em::before, h2 em::before { display: none; } }
+.lede { max-width: 52ch; color: var(--stone); margin: 0; }
+.tagline { margin: 0; font-size: clamp(26px, 3vw, 34px); line-height: 1.1; }
 .facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; font-family: var(--mono); font-size: 12px; }
 .facts li { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--soft); }
 .cmd { position: relative; max-width: 760px; }
@@ -249,11 +261,12 @@ canvas { display: block; width: 100%; height: auto; }
   font: 700 10.5px/18px var(--mono); text-align: center; box-shadow: 0 0 0 2px var(--magenta), 0 0 10px rgba(255,46,196,.5); pointer-events: none; }
 .status { padding: 8px 14px; font-family: var(--mono); font-size: 12px; color: var(--stone); border-top: 1px solid var(--line); }
 .legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px 28px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.legend b { color: var(--paper); }
 .legend li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; color: var(--soft); font-size: 15px; }
 .legend i { font: 700 10.5px/18px var(--mono); font-style: normal; width: 18px; height: 18px; margin-top: 3px; border-radius: 50%; text-align: center;
   background: var(--bright); color: var(--sumi); box-shadow: 0 0 0 2px var(--magenta); }
 section { display: grid; gap: 14px; }
-h2 { font-size: clamp(22px, 3vw, 28px); line-height: 1.2; margin: 0; font-weight: 700; }
+h2 { font-size: clamp(22px, 3vw, 28px); line-height: 1.2; margin: 0; }
 .tiles { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .tile { margin: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--sumi-hi); display: grid; align-content: start; }
 .tile img, .tile canvas { display: block; width: 100%; height: auto; background: var(--sumi); }
@@ -261,6 +274,7 @@ h2 { font-size: clamp(22px, 3vw, 28px); line-height: 1.2; margin: 0; font-weight
   .tile img, .tile canvas { aspect-ratio: 8 / 5; object-fit: cover; object-position: center top; }
   .tile canvas { object-position: left top; -webkit-mask-image: linear-gradient(#000 72%, transparent); mask-image: linear-gradient(#000 72%, transparent); }
 }
+.tile figcaption code { white-space: nowrap; }
 .tile figcaption { padding: 12px 16px 14px; color: var(--soft); font-size: 15px; border-top: 1px solid var(--line); }
 .tile figcaption b { color: var(--paper); font-weight: 700; }
 footer { font-family: var(--mono); font-size: 12px; color: var(--stone); letter-spacing: .03em; border-top: 1px solid var(--line); padding-top: 14px; }
@@ -273,23 +287,23 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
 <header>
   <div class="pitch">
     <div class="eyebrow"><b>★</b> As seen below your prompt <b>★</b></div>
-    <div class="title"><h1>Neon Sumi, <em>lit</em></h1>
-      <svg class="deco spark a" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z"/></svg><svg class="deco spark b" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z"/></svg></div>
-    <p class="lede">Tired of asking Claude how much context is left? Squinting at CI? Guessing which port your app is on? <b>Never ask again.</b></p>
-    <ul class="facts"><li>100% free · MIT</li><li>no batteries required: stdlib + one TS module</li><li>~30 ms a render*</li><li>no network on the render path</li><li>zero telemetry</li><li>fits ANY width</li></ul>
+    <h1><span class="solid">Neon Sumi,</span> <em>lit</em></h1>
+    <p class="lede">Tired of asking how much context is left? Squinting at CI? Guessing ports?</p>
+    <p class="tagline"><span class="solid">Never ask again.</span></p>
+    <ul class="facts"><li>100% free · MIT</li><li>no batteries required*</li><li>~30 ms a render*</li><li>zero telemetry</li></ul>
     <div class="cta"><a class="btn" href="__REPO__">Look under the hood ↗</a></div>
   </div>
   <div class="order">
-    <div class="label"><b>Order now</b> · operators are standing by</div>
+    <div class="label"><b>Order now</b> · operators standing by</div>
     <div class="cmd" id="install">
-<pre id="cmds"><span class="c"># type these in Claude Code, one at a time</span>
+<pre id="cmds"><span class="c"># in Claude Code, one at a time</span>
 /plugin marketplace add __SLUG__
 /plugin install neon-sumi@neon-sumi
 /neon-sumi:install</pre>
       <button type="button" class="copy" id="copy" aria-label="Copy the install commands">copy now</button>
       <svg class="deco burst" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50.0,2.0 57.4,12.7 68.4,5.7 71.1,18.4 83.9,16.1 81.6,28.9 94.3,31.6 87.3,42.6 98.0,50.0 87.3,57.4 94.3,68.4 81.6,71.1 83.9,83.9 71.1,81.6 68.4,94.3 57.4,87.3 50.0,98.0 42.6,87.3 31.6,94.3 28.9,81.6 16.1,83.9 18.4,71.1 5.7,68.4 12.7,57.4 2.0,50.0 12.7,42.6 5.7,31.6 18.4,28.9 16.1,16.1 28.9,18.4 31.6,5.7 42.6,12.7"/><text x="50" y="57" text-anchor="middle" font-size="21">FREE!</text></svg>
     </div>
-    <p class="small">Not sold in stores. Step three copies the files to <code>~/.claude/neon-sumi/</code>, renders once and asks before it touches <code>settings.json</code>. Backup included.</p>
+    <p class="small">Not sold in stores. Asks before it touches <code>settings.json</code>. Backup included.</p>
   </div>
 </header>
 
@@ -306,35 +320,35 @@ a:focus-visible { outline: 2px solid var(--magenta); outline-offset: 2px; }
 </div>
 
 <ol class="legend" aria-label="What the numbers point at">
-  <li><i>1</i><span>Context, 5-hour and weekly limits. Cool at rest, amber at 70 %, red at 85 %. Never get caught short again!</span></li>
-  <li id="lg2"><i>2</i><span>Where your 5-hour window lands at reset, at today's pace. It's a crystal ball for your quota!</span></li>
-  <li><i>3</i><span>Every link and readable file from the chat, one click away. No more scrolling back!</span></li>
-  <li><i>4</i><span>Branch, diff, worktree, and every PR, ticket and issue you mentioned, with titles. Your whole repo at a glance!</span></li>
-  <li><i>5</i><span>Only the dev servers that actually answer. No more guessing ports!</span></li>
+  <li><i>1</i><span><b>Limits.</b> Never get caught short again!</span></li>
+  <li id="lg2"><i>2</i><span><b>Forecast.</b> A crystal ball for your quota!</span></li>
+  <li><i>3</i><span><b>Links.</b> No more scrolling back!</span></li>
+  <li><i>4</i><span><b>Repo.</b> Every PR and ticket, at a glance!</span></li>
+  <li><i>5</i><span><b>Ports.</b> Only the ones that answer!</span></li>
 </ol>
 
 <section id="more">
-  <h2>But wait, <em>there's more!</em></h2>
+  <h2><span class="solid">But wait,</span> <em>there's more!</em></h2>
   <div class="tiles">
-    <figure class="tile"><canvas id="ck" aria-label="The cockpit, one frame"></canvas><svg class="deco sticker" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50.0,2.0 57.4,12.7 68.4,5.7 71.1,18.4 83.9,16.1 81.6,28.9 94.3,31.6 87.3,42.6 98.0,50.0 87.3,57.4 94.3,68.4 81.6,71.1 83.9,83.9 71.1,81.6 68.4,94.3 57.4,87.3 50.0,98.0 42.6,87.3 31.6,94.3 28.9,81.6 16.1,83.9 18.4,71.1 5.7,68.4 12.7,57.4 2.0,50.0 12.7,42.6 5.7,31.6 18.4,28.9 16.1,16.1 28.9,18.4 31.6,5.7 42.6,12.7"/><text x="50" y="58" text-anchor="middle" font-size="24">NEW!</text></svg><figcaption><b>The cockpit!</b> · Type <code>/neon-sumi-cockpit</code> and get a whole pane: your limits, every port by owner, your PRs, the inbox and this week's skills.</figcaption></figure>
-    <figure class="tile"><img src="obsidian.png" width="1800" height="1157" loading="lazy" alt="The Obsidian theme: neon headings and links on an ink-black note"><figcaption><b>Obsidian, too!</b> · The same glow for your notes, plus a profile for the Terminal plugin.</figcaption></figure>
-    <figure class="tile"><img src="themes.png" width="1600" height="950" loading="lazy" alt="A terminal in the Neon Sumi palette, with the sixteen colours along the bottom"><figcaption><b>Matching themes!</b> · Ghostty, iTerm2, Zed and Claude Code's own <code>/theme</code>, all from one token file. Collect them all!</figcaption></figure>
+    <figure class="tile"><canvas id="ck" aria-label="The cockpit, one frame"></canvas><figcaption><b>NEW! The cockpit!</b> · <code>/neon-sumi-cockpit</code> puts it all in one pane.</figcaption></figure>
+    <figure class="tile"><img src="obsidian.png" width="1800" height="1157" loading="lazy" alt="The Obsidian theme: neon headings and links on an ink-black note"><figcaption><b>Obsidian, too!</b> · The same glow for your notes.</figcaption></figure>
+    <figure class="tile"><img src="themes.png" width="1600" height="950" loading="lazy" alt="A terminal in the Neon Sumi palette, with the sixteen colours along the bottom"><figcaption><b>Matching themes!</b> · Ghostty, iTerm2, Zed, <code>/theme</code>. Collect them all!</figcaption></figure>
   </div>
 </section>
 
 <section class="fine" aria-label="The fine print">
   <svg class="deco seal" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="ring" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0"/></defs>
-    <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"/><circle cx="50" cy="50" r="27" fill="none" stroke="currentColor" stroke-width="1"/>
+    <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="50" r="27" fill="none" stroke="currentColor" stroke-width="1"/>
     <text font-size="8" letter-spacing="1.1"><textPath href="#ring">MONEY-BACK GUARANTEE ★ 100% FREE ★</textPath></text>
     <text x="50" y="50" text-anchor="middle" font-size="15">100%</text><text x="50" y="62" text-anchor="middle" font-size="6.5">GUARANTEED**</text></svg>
   <ul>
-    <li>* ~30 ms on Python 3.11+. Needs Python 3.9+ as <code>python3</code> on your PATH, a Nerd Font and <code>git</code>.</li>
-    <li><code>gh</code> sold separately (also free). It lights up the GitHub rows.</li>
-    <li>** It's free. Repo, tickets and ports shown are dramatised. No terminals were harmed.</li>
+    <li>* ~30 ms on Python 3.11+. Python stdlib only. Needs <code>python3</code> 3.9+, a Nerd Font and <code>git</code>.</li>
+    <li><code>gh</code> sold separately (also free) for the GitHub rows.</li>
+    <li>** It's free. No terminals were harmed.</li>
   </ul>
 </section>
 
-<footer><b style="color:var(--magenta);font-weight:400">Neon Sumi</b> · MIT · <a href="__REPO__">source, issues and docs on GitHub</a> · typeset in Maple Mono (SIL OFL 1.1) · icons from Nerd Fonts</footer>
+<footer><b style="color:var(--magenta);font-weight:400">Neon Sumi</b> · MIT · <a href="__REPO__">GitHub</a> · Maple Mono (OFL) · Nerd Fonts icons</footer>
 </div>
 
 <script>
@@ -492,7 +506,7 @@ document.getElementById("copy").addEventListener("click", function () {
     const t0 = performance.now();
     if (reduce) { r.frame(1.2); pins(); st.textContent = note() || "still frame · reduced motion is on"; return; }
     r.frame(0); pins();
-    st.textContent = note() || "live · watch the comet chase the cursor";
+    st.textContent = note() || "live · move your cursor";
     let visible = true, last = 0;
     new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible) requestAnimationFrame(loop); }).observe(lit);
     function loop(now) {
