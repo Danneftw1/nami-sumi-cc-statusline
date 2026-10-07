@@ -178,6 +178,22 @@ python3 tools/build_themes.py          # every port, from the tokens
 python3 tools/build_themes.py --check  # colours in the repo that are not tokens
 ```
 
+### The site's theme
+
+Neon Sumi itself is dark: the status line, cockpit, shader and the Obsidian, iTerm2, Zed and Claude Code themes stay
+as the tokens draw them. The site, `docs/index.html`, follows a different rule:
+
+- Light is the default theme. Dark exists only behind an explicit toggle; it never switches on its own from
+  `prefers-color-scheme`.
+- The light theme is dimmed and easy on the eyes: no white or near-white grounds. The brightest surface stays at or
+  below OKLCH L 0.82 (roughly `#C3BFB5` for a warm grey); the page ground sits a step darker; greys carry a slight hue.
+- Ink is softened, but body text keeps 4.5:1 on every ground it sits on (3:1 for large text, control borders, focus
+  rings, icons). A dimmer ground means darker secondary ink to keep the ratio.
+- Accents drop in lightness and chroma to match: no glaring saturated fills.
+
+A palette that meets it: panel `#B4B0A7` (L 0.76), dial `#C3BFB5` (L 0.81), ink `#191B1D`, ink-2 `#3C3F43`, accent
+`#B9721A`. Today's site is still dark only; it changes when `tools/build_docs.py` is next reworked.
+
 Issues and pull requests are welcome.
 
 ## License and credits
